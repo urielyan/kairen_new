@@ -23,7 +23,10 @@ SOURCES += main.cpp\
     windows/wincountmeasure.cpp \
     windows/winspectrumeasure.cpp \
     windows/winsystrmsettings.cpp \
-    common/numberinput.cpp
+    common/numberinput.cpp \
+    communication/posix_qextserialport.cpp \
+    communication/qextserialbase.cpp \
+    communication/com.cpp
 
 HEADERS  += mainwindow.h \
     common/wininforlistdialog.h \
@@ -37,4 +40,7 @@ HEADERS  += mainwindow.h \
     windows/wincountmeasure.h \
     windows/winspectrumeasure.h \
     windows/winsystrmsettings.h \
-    common/numberinput.h
+    common/numberinput.h \
+    communication/posix_qextserialport.h \
+    communication/qextserialbase.h \
+    communication/com.h
