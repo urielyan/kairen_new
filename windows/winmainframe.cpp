@@ -23,8 +23,7 @@ WinMainFrame::WinMainFrame(QWidget *parent)
         p_buttonWinMannager->addButtonWin(p_syetemButton, new WinSystrmSettings(this), SystemSettings);
         p_hBoxLayout->addWidget(p_syetemButton);
 
-        QPushButton *p_inPlateButton = p_componentFactory->getButton(tr("In plate"), this);
-        p_hBoxLayout->addWidget(p_inPlateButton);
+        p_hBoxLayout->addWidget(getInPlateButton());
 
         addLayout(p_hBoxLayout);
     }
@@ -38,8 +37,7 @@ WinMainFrame::WinMainFrame(QWidget *parent)
         QPushButton *p_syetemButton =p_componentFactory->getButton(tr("Self test"), this);
         p_hBoxLayout->addWidget(p_syetemButton);
 
-        QPushButton *p_outPlateButton = p_componentFactory->getButton(tr("Out plate"), this);
-        p_hBoxLayout->addWidget(p_outPlateButton);
+        p_hBoxLayout->addWidget(getOutPlateButton());
 
         addLayout(p_hBoxLayout);
     }

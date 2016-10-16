@@ -2,11 +2,14 @@
 #include <QHeaderView>
 #include <QTableWidgetItem>
 #include <QDebug>
+#include <QByteArray>
 
 #include "mainwindow.h"
 #include "winspectrumeasure.h"
 
 #include "common/abstractfactory.h"
+#include "common/wininforlistdialog.h"
+#include "common/datasave.h"
 
 #include "communication/com.h"
 
@@ -50,6 +53,8 @@ void WinSpectruMeasure::slotStartButtonClicked()
 void WinSpectruMeasure::slotStopbuttonClicked()
 {
     qDebug() << __FILE__ << __LINE__;
+    Com::instance()->sendOrder(Com::StopMeasure);
+    m_timer.stop();
 
 }
 
@@ -61,7 +66,27 @@ void WinSpectruMeasure::slotViewSummitButtonClicked()
 
 void WinSpectruMeasure::slotReadComData()
 {
+    QByteArray recvData = Com::instance()->slotReadMyCom();
+    if(recvData == NULL || recvData.size() != 8|| recvData[1] != (char)0x01)
+    {
+        WinInforListDialog::instance()->showMsg(tr("err") + recvData);
+        ErrorCountSave::instance()->addCount(1);
+        m_timer.stop();
+        return;
+    }
 
+    uint which = (int)recvData[2] * 10 + (int)recvData[3] - 4;
+    int row = which / 10;
+    int column = which % 10;
+    QString value = QString::number((double)(which + 4)/10);
+    QString count = recvData.mid(4, 5);
+    p_tableWidget->item(row, column)->setText(value);
+    p_tableWidget->item(row, column + 1)->setText(count);
+
+    if(row == 9 && column == 6)
+    {
+        m_timer.stop();
+    }
 }
 
 void WinSpectruMeasure::initTableWidget()

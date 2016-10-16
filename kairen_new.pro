@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     communication/posix_qextserialport.cpp \
     communication/qextserialbase.cpp \
     communication/com.cpp \
-    windows/winmainframe.cpp
+    windows/winmainframe.cpp \
+    common/datasave.cpp
 
 HEADERS  += mainwindow.h \
     common/wininforlistdialog.h \
@@ -45,4 +46,5 @@ HEADERS  += mainwindow.h \
     communication/posix_qextserialport.h \
     communication/qextserialbase.h \
     communication/com.h \
-    windows/winmainframe.h
+    windows/winmainframe.h \
+    common/datasave.h
