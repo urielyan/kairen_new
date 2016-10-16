@@ -24,8 +24,8 @@ public:
     void sendOrder(Com::Order order);
 signals:
 
-private slots:
-    void slotReadMyCom(); //读取串口
+public slots:
+    QByteArray slotReadMyCom(); //读取串口
 
 private:
     explicit Com(QObject *parent = 0);

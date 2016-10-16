@@ -34,22 +34,51 @@ Com *Com::instance()
     return &_instance;
 }
 
+//本pc机采用的是小端架构的，而arm的机械一般是大端的，所以所有的命令都是倒序的
+#define STOP_ORDER              0xff98feUL
+#define CURRENT_POSITION        0XFF98FEUL
+#define ACTIVATING_SPECTRUM     0XFF01FEUL
+#define ACTIVATINE_COUNT        0XFF02FEUL
+//#define ACTIVATING_CONTENT      0XFF03FEUL
+#define ACTIVATING_CALIBRATE    0XFF04FEUL
+#define IN_SLIDING_PLATE        0XFF3106FEUL
+#define OUT_SLIDING_PLATE       0XFF3206FEUL
+
 void Com::sendOrder(Com::Order order)
 {
     QMap<Com::Order, char*> orderMap;
-    char array[3] = {0x32, 0x31, 0xdd};
-    orderMap[SpectrueMeasure] = (char *)array;
+    char arraySpectrueMeasure[3] = {0xfe, 0x01, 0xff};
+    orderMap[SpectrueMeasure] = (char *)arraySpectrueMeasure;
 
-    qDebug() << array;
+    char arrayCountMeasure[3] = {0xfe, 0x02, 0xff};
+    orderMap[CountMeasure] = (char *)arrayCountMeasure;
+
+
+    qDebug() << strlen(arraySpectrueMeasure[order]) << arraySpectrueMeasure[order];
+    myCom->write(arraySpectrueMeasure[order], strlen(arraySpectrueMeasure[order]));
 }
 
-void Com::slotReadMyCom()
+QByteArray Com::slotReadMyCom()
 {
-    static int i =0;
-    qDebug()<<i++;
-    QByteArray temp = myCom->readAll();
-    //读取串口缓冲区的所有数据给临时变量temp
+    static int readCount =0;
 
-    qDebug() << temp;
+    QByteArray readData;
+    for(int i = 0; i < 3; i++)
+    {
+        myCom->setTimeout(1000);
+        readData = myCom->readAll();    //读取串口缓冲区的所有数据给临时变量
+
+        if(readData.isEmpty())
+        {
+            qDebug()<<readCount++;
+            continue;
+        }
+        break;
+    }
+
+
+    qDebug() << readData;
+
+    return readData;
 }
 

@@ -26,7 +26,8 @@ SOURCES += main.cpp\
     common/numberinput.cpp \
     communication/posix_qextserialport.cpp \
     communication/qextserialbase.cpp \
-    communication/com.cpp
+    communication/com.cpp \
+    windows/winmainframe.cpp
 
 HEADERS  += mainwindow.h \
     common/wininforlistdialog.h \
@@ -43,4 +44,5 @@ HEADERS  += mainwindow.h \
     common/numberinput.h \
     communication/posix_qextserialport.h \
     communication/qextserialbase.h \
-    communication/com.h
+    communication/com.h \
+    windows/winmainframe.h

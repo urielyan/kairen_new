@@ -2,6 +2,7 @@
 #define SPECTRUMEASUREMENT_H
 
 #include "winabstractframe.h"
+#include <QTimer>
 
 class QTableWidget;
 class WinViewSummit : public WinAbstractFrame
@@ -23,10 +24,13 @@ private slots:
     void slotStartButtonClicked();
     void slotStopbuttonClicked();
     void slotViewSummitButtonClicked();
+    void slotReadComData();
 
 private:
     QTableWidget *p_tableWidget;
     void initTableWidget();
+
+    QTimer m_timer;
 };
 
 #endif // SPECTRUMEASUREMENT_H

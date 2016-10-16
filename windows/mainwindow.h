@@ -4,27 +4,8 @@
 #include <QMap>
 #include <QFrame>
 #include <QStackedLayout>
-#include "winabstractframe.h"
 
-class ButtonWinMannager;
-class WinMainFrame : public WinAbstractFrame
-{
-    Q_OBJECT
-
-public:
-    enum WinId{
-        SampleMeasure = 0,
-        SystemSettings,
-        DataQuery
-    };
-    WinMainFrame(QWidget *parent = 0);
-    ~WinMainFrame(){}
-
-private:
-    ButtonWinMannager *p_buttonWinMannager;
-};
-
-
+class WinAbstractFrame;
 class MainWindow : public QFrame
 {
     Q_OBJECT

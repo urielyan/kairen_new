@@ -3,9 +3,12 @@
 #include <QTableWidgetItem>
 #include <QDebug>
 
-#include "winspectrumeasure.h"
-#include "common/abstractfactory.h"
 #include "mainwindow.h"
+#include "winspectrumeasure.h"
+
+#include "common/abstractfactory.h"
+
+#include "communication/com.h"
 
 WinSpectruMeasure::WinSpectruMeasure(QWidget *parent)
     :WinAbstractFrame(parent)
@@ -34,12 +37,14 @@ WinSpectruMeasure::WinSpectruMeasure(QWidget *parent)
         p_buttonLayout->addWidget(getOutPlateButton());
         p_buttonLayout->addWidget(getReturnButton());
     }
-    qDebug() << "end";
+
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(slotReadComData()));
 }
 
 void WinSpectruMeasure::slotStartButtonClicked()
 {
-    qDebug() << __FILE__ << __LINE__;
+    Com::instance()->sendOrder(Com::SpectrueMeasure);
+    m_timer.start(2000);
 }
 
 void WinSpectruMeasure::slotStopbuttonClicked()
@@ -52,6 +57,11 @@ void WinSpectruMeasure::slotViewSummitButtonClicked()
 {
     WinViewSummit *viewSummit = new WinViewSummit(p_tableWidget, this);
     MainWindow::instance()->slotSetWidget(viewSummit);
+}
+
+void WinSpectruMeasure::slotReadComData()
+{
+
 }
 
 void WinSpectruMeasure::initTableWidget()

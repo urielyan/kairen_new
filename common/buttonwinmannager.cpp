@@ -2,7 +2,7 @@
 
 #include "buttonwinmannager.h"
 #include "windows/mainwindow.h"
-
+#include "windows/winabstractframe.h"
 ButtonWinMannager::ButtonWinMannager(QObject *parent) : QObject(parent)
 {
     p_buttonGroup = new QButtonGroup(this);
