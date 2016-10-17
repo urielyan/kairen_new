@@ -26,7 +26,6 @@ StatusBar::StatusBar(QWidget *parent) :
     p_mainLayout->addWidget(&m_plateLabel);
     p_mainLayout->addWidget(&m_labelIsPreheatSampling);
     p_mainLayout->addWidget(&m_labelDateTime);
-
 }
 int StatusBar::is_sampling_num = 0;
 

@@ -20,7 +20,7 @@ WinAbstractFrame::WinAbstractFrame(QWidget *parent)
     p_title->setText("title");
     p_title->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
     p_title->setFont(QFont("Times", 20));
-    p_title->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    p_title->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
 
     //m_mainVBoxLayout.addStretch();
     addWidget(p_title);
@@ -33,12 +33,12 @@ void WinAbstractFrame::setTitle(QString title)
 
 void WinAbstractFrame::addWidget(QWidget *widget)
 {
-    m_mainVBoxLayout.insertWidget(m_mainVBoxLayout.count(), widget);
+    m_mainVBoxLayout.insertWidget(m_mainVBoxLayout.count(), widget, 1);
 }
 
 void WinAbstractFrame::addLayout(QLayout *layout)
 {
-    m_mainVBoxLayout.insertLayout(m_mainVBoxLayout.count(), layout);
+    m_mainVBoxLayout.insertLayout(m_mainVBoxLayout.count(), layout, 1);
 }
 
 QPushButton *WinAbstractFrame::getReturnButton()
@@ -69,23 +69,46 @@ void WinAbstractFrame::slotReturnButtonClicked()
 
 void WinAbstractFrame::slotInPlatebuttonClicked()
 {
+#ifdef TEST_COM
+    QByteArray recvData;
+    recvData[0] = (char)0xfe;
+    recvData[1] = (char)0x98;
+    recvData[2] = (char)0x32;
+    recvData[3] = (char)0xff;
+    Com::instance()->setRecvData(recvData);
+#endif
+
+
     Com::instance()->sendOrder(Com::InPlate);
     setPlatePosition(Com::instance()->slotReadMyCom());
 }
 
 void WinAbstractFrame::slotOutPlatebuttonClicked()
 {
+#ifdef TEST_COM
+    QByteArray recvData;
+    recvData[0] = (char)0xfe;
+    recvData[1] = (char)0x98;
+    recvData[2] = (char)0x31;
+    recvData[3] = (char)0xff;
+    Com::instance()->setRecvData(recvData);
+#endif
+
     Com::instance()->sendOrder(Com::OutPlate);
     setPlatePosition(Com::instance()->slotReadMyCom());
 }
 
+/**
+*   @brief 接收到的数据为0xfe 0x98 0x31(32,33) 0xff
+*/
 void WinAbstractFrame::setPlatePosition(QByteArray recvData)
 {
     if(recvData.isEmpty())
     {
+        StatusBar::instance()->slotUpdatePosition(StatusBar::UnKnow);
         WinInforListDialog::instance()->showMsg(tr("recv null"));
         return;
-    }else if(recvData[2] == (char)0x33)
+    }else if(recvData[2] == (char)0x31)
     {
         StatusBar::instance()->slotUpdatePosition(StatusBar::Referencce);
     }else if(recvData[2] == (char)0x32)
@@ -96,6 +119,7 @@ void WinAbstractFrame::setPlatePosition(QByteArray recvData)
         StatusBar::instance()->slotUpdatePosition(StatusBar::Malfunction);
     }else
     {
+        StatusBar::instance()->slotUpdatePosition(StatusBar::UnKnow);
         WinInforListDialog::instance()->showMsg(tr("recv err") + QString(recvData).toInt());
     }
 }

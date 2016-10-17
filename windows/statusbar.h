@@ -19,7 +19,6 @@ public:
         UnKnow
     };
     static StatusBar* instance();
-    explicit StatusBar(QWidget *parent = 0);
     ~StatusBar();
     static int is_sampling_num;
 
@@ -31,6 +30,8 @@ public slots:
     void slotUpdatepreheat();
 
 private:
+    explicit StatusBar(QWidget *parent = 0);
+
     bool blink_flag;
 
     QTimer *timerIsPreheat;

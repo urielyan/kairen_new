@@ -8,6 +8,8 @@ WinCountMeasure::WinCountMeasure(QWidget *parent)
     : WinAbstractFrame(parent)
 {
     setTitle(tr("count measure"));
+    p_componentFactory = new MeasureFrameComponent(this);
+
     initMeasureLabel();
     initbutton();
 }

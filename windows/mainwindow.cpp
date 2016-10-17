@@ -19,13 +19,12 @@ MainWindow *MainWindow::instance()
 MainWindow::MainWindow(QWidget *parent)
     : QFrame(parent)
 {
-    this->setFixedHeight(DESKTOP_HEIGHT / 2);
-    this->setFixedWidth(DESKTOP_WIDTH / 2);
+    this->setFixedHeight(480);
+    this->setFixedWidth(800);
 
     QVBoxLayout *p_mainLayout = new QVBoxLayout(this);
-    p_mainLayout->addLayout(&m_stackedLayout);
-    p_mainLayout->addStretch();
-    p_mainLayout->addWidget(StatusBar::instance());
+    p_mainLayout->addLayout(&m_stackedLayout, 9);
+    p_mainLayout->addWidget(StatusBar::instance(), 1);
 
     WinMainFrame *p_mainFrame = new WinMainFrame(this);
     slotSetWidget(p_mainFrame);

@@ -57,8 +57,8 @@ void Com::sendOrder(Com::Order order)
     char arrayOutPlate[4] = {(char)0xfe, (char)0x06, (char)0x32, (char)0xff};
     orderMap[OutPlate] = (char *)arrayOutPlate;
 
-    qDebug() << strlen(orderMap[order]) << orderMap[order];
-    myCom->write(orderMap[order], strlen(orderMap[order]));
+    Q_ASSERT(orderMap.contains(order));
+    qDebug() << myCom->write(orderMap[order], strlen(orderMap[order]));
 }
 
 QByteArray Com::slotReadMyCom()
@@ -73,16 +73,37 @@ QByteArray Com::slotReadMyCom()
 
         if(readData.isEmpty())
         {
-            qDebug()<<readCount++;
+            qDebug()<< "read count:" << readCount++;
             continue;
         }
         break;
     }
+    readCount = 0;
 
-    QString tmp = readData.left(readData.size() - 1);
-    tmp .chop(1);
-    qDebug() << QString::number(tmp.toInt(), 16);
+//    QString tmp = readData.left(readData.size() - 1);
+//    tmp .chop(1);
+//    qint64 recvDataQint64 = tmp.toInt();
+//    qDebug() << QString::number(recvDataQint64, 16);
+#ifdef TEST_COM
+    readData = getRecvData();
+    qDebug() << QString::number(readData.toInt(), 16);
+#endif
 
     return readData;
 }
 
+
+
+
+
+#ifdef TEST_COM
+void Com::setRecvData(QByteArray data)
+{
+    testData = data;
+}
+
+QByteArray Com::getRecvData()
+{
+    return testData;
+}
+#endif

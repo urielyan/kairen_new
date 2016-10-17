@@ -3,8 +3,15 @@
 
 #include <QObject>
 
+class RecvData
+{
+public:
+    explicit RecvData(QObject *parent = 0);
+
+};
+
 class QTimer;
-class Posix_QextSerialPort;
+class QextSerialBase;
 class Com : public QObject
 {
     Q_OBJECT
@@ -30,9 +37,18 @@ public slots:
 private:
     explicit Com(QObject *parent = 0);
 
-    Posix_QextSerialPort *myCom;
+    QextSerialBase *myCom;
     QTimer *readTimer;
 
+public:
+    //test
+#define TEST_COM
+
+#ifdef TEST_COM
+    QByteArray testData;
+    void setRecvData(QByteArray data);
+    QByteArray getRecvData();
+#endif
 };
 
 #endif // COM_H

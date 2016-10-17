@@ -10,7 +10,13 @@ class WinViewSummit : public WinAbstractFrame
 public:
     explicit WinViewSummit(QTableWidget *tableWidget, QWidget *parent = 0);
 
+protected:
+    void paintEvent(QPaintEvent *);
+
 private:
+    QWidget paintFrame;
+
+    void drawCoordinate(QPainter &painter);
 };
 
 class WinSpectruMeasure : public WinAbstractFrame
@@ -19,6 +25,7 @@ class WinSpectruMeasure : public WinAbstractFrame
 
 public:
     explicit WinSpectruMeasure(QWidget *parent = 0);
+    void init();
 
 private slots:
     void slotStartButtonClicked();

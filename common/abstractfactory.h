@@ -36,4 +36,19 @@ signals:
 public slots:
 };
 
+class MeasureFrameComponent : public AbstractComponentFactory
+{
+    Q_OBJECT
+public:
+    explicit MeasureFrameComponent(QObject *parent = 0);
+    QLabel* getLabel(QString text, QWidget *parent = 0) Q_DECL_OVERRIDE;
+    QPushButton* getButton(QString text, QWidget *parent = 0) Q_DECL_OVERRIDE;
+    QBoxLayout *getBoxLayout(QBoxLayout::Direction direction, QWidget *parent = 0) Q_DECL_OVERRIDE;
+
+    ~MeasureFrameComponent();
+signals:
+
+public slots:
+};
+
 #endif // ABSTRACTFACTORY_H

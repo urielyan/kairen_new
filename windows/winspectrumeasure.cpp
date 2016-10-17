@@ -3,6 +3,8 @@
 #include <QTableWidgetItem>
 #include <QDebug>
 #include <QByteArray>
+#include <QPaintEvent>
+#include <QPainter>
 
 #include "mainwindow.h"
 #include "winspectrumeasure.h"
@@ -17,6 +19,7 @@ WinSpectruMeasure::WinSpectruMeasure(QWidget *parent)
     :WinAbstractFrame(parent)
 {
     setTitle(tr("Spectrum measurement"));
+    p_componentFactory = new MeasureFrameComponent(this);
 
     initTableWidget();
 
@@ -44,8 +47,20 @@ WinSpectruMeasure::WinSpectruMeasure(QWidget *parent)
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(slotReadComData()));
 }
 
+void WinSpectruMeasure::init()
+{
+    m_timer.stop();
+    p_tableWidget->clearContents();
+}
+
 void WinSpectruMeasure::slotStartButtonClicked()
 {
+    if(m_timer.isActive())
+    {
+        return;
+    }
+    init();
+
     Com::instance()->sendOrder(Com::SpectrueMeasure);
     m_timer.start(2000);
 }
@@ -55,7 +70,6 @@ void WinSpectruMeasure::slotStopbuttonClicked()
     qDebug() << __FILE__ << __LINE__;
     Com::instance()->sendOrder(Com::StopMeasure);
     m_timer.stop();
-
 }
 
 void WinSpectruMeasure::slotViewSummitButtonClicked()
@@ -66,8 +80,28 @@ void WinSpectruMeasure::slotViewSummitButtonClicked()
 
 void WinSpectruMeasure::slotReadComData()
 {
+#ifdef TEST_COM
+    static uint valueCount = 4;
+    QByteArray data;
+    data[0] = (char)0xfe;
+    data[1] = (char)0x01;
+    data[2] = (char)0x00 + (char)valueCount/10;
+    data[3] = (char)0x00 + (char)valueCount%10;
+    data[4] = (char)0x31;
+    data[5] = (char)0x32;
+    data[6] = (char)0x33;
+    data[7] = data[2] + (char)0x30;
+    data[8] = data[3] + (char)0x30;
+    data[9] = (char)0xff;
+    valueCount++;
+    if(valueCount >= 44)
+    {
+        valueCount = 4;
+    }
+    Com::instance()->setRecvData(data);
+#endif
     QByteArray recvData = Com::instance()->slotReadMyCom();
-    if(recvData == NULL || recvData.size() != 8|| recvData[1] != (char)0x01)
+    if(recvData == NULL || recvData.size() != 10|| recvData[1] != (char)0x01)
     {
         WinInforListDialog::instance()->showMsg(tr("err") + recvData);
         ErrorCountSave::instance()->addCount(1);
@@ -76,12 +110,12 @@ void WinSpectruMeasure::slotReadComData()
     }
 
     uint which = (int)recvData[2] * 10 + (int)recvData[3] - 4;
-    int row = which / 10;
-    int column = which % 10;
-    QString value = QString::number((double)(which + 4)/10);
+    int column = which / 10 * 2;
+    int  row = which % 10;
+    QString value = QString::number((double)(which + 4)/10, 'f', 1);//以小树形式显示阈值,只显示一位小数点.
     QString count = recvData.mid(4, 5);
-    p_tableWidget->item(row, column)->setText(value);
-    p_tableWidget->item(row, column + 1)->setText(count);
+    p_tableWidget->setItem(row, column, new QTableWidgetItem(value));
+    p_tableWidget->setItem(row, column + 1, new QTableWidgetItem(count));
 
     if(row == 9 && column == 6)
     {
@@ -92,7 +126,7 @@ void WinSpectruMeasure::slotReadComData()
 void WinSpectruMeasure::initTableWidget()
 {
     p_tableWidget = new QTableWidget(10, 8, this);
-//    p_tableWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    p_tableWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 //    p_tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 //    p_tableWidget->horizontalHeader()->setStretchLastSection(true);
 //    p_tableWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);//设置垂直滚动条显示模式
@@ -113,12 +147,84 @@ void WinSpectruMeasure::initTableWidget()
 WinViewSummit::WinViewSummit(QTableWidget *tableWidget, QWidget *parent)
     : WinAbstractFrame(parent)
 {
+    Q_ASSERT(tableWidget != NULL);
     Q_ASSERT(tableWidget->rowCount() == 10);
     Q_ASSERT(tableWidget->columnCount() == 8);
 
     setTitle(tr("View spectrum summit"));
+    p_componentFactory = new MeasureFrameComponent(this);
 
     qDebug() << tableWidget->rowCount();
 
+    addWidget(&paintFrame);
+    paintFrame.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     addWidget(getReturnButton());
+}
+
+void WinViewSummit::paintEvent(QPaintEvent */*event*/)
+{
+    int rect_width = this->width()/130;
+    int side = qMin(width(), height());                                           //创建窗口宽高参数
+    QPainter painter(this);
+    painter.setViewport(paintFrame.rect());
+    //painter.setWindow(paintFrame.rect());
+    painter.setRenderHint(QPainter::Antialiasing,true);                //开启抗锯齿
+    painter.translate(50, height());                               //坐标系统平移变换，把原点平移到SUIT POSITION
+    painter.scale(side / 300.0, side / 300.0);            //坐标系统比例变换，使绘制的图形随窗口的放大而放大
+    //painter.scale(1, -1);                                          //Y轴向上翻转，翻转成正常平面直角坐标系
+
+    painter.setPen(QPen(Qt::black, height() /1000));
+    painter.setBrush(Qt::cyan);
+    painter.setFont(QFont("Times", 10));
+
+    drawCoordinate(painter);
+
+
+//    for(int i = 0; i < 9; i++){
+//        // y axes;
+//        painter.drawText(-6* DISPLAY_ONT_SIZE,- i * 25 ,QString::number(i * 500));
+//        painter.drawLine(0,- i * 25,5,- i * 25);
+//        //painter.drawRoundRect();
+//      }
+//    for(int i = 1;i <= SPECTRUM_PAINTER_WIDTH ;i++){
+//        int value = -(*(spectrum_data + i - 1))/20;
+//        painter.drawLine(i*rect_width - rect_width/2 ,0,i*rect_width - rect_width/2,5);//坐标上的line
+//        if((i-1) % 5 == 0)painter.drawText(i*rect_width  - DISPLAY_ONT_SIZE * 2,10,QString::number((double)(i-1)/10,'f',1));//坐标上的值
+
+//        if(i == different_display_color){
+//            painter.setBrush(Qt::blue);
+//            painter.drawRect((i-1)*rect_width,0\
+//                             ,rect_width,value);
+//            painter.setBrush(Qt::cyan);
+//            continue;
+//          }
+//        painter.drawRect((i-1)*rect_width,0\
+//                         ,rect_width,value);
+//        //painter.drawText((i-1)*rect_width + DISPLAY_ONT_SIZE/2 - 1,value - 4 ,QString::number(*(spectrum_data + i - 1)));//柱状图上的值
+//        //painter.drawLine(i*rect_width - DISPLAY_ONT_SIZE,3 * i * (i - 15),(i + 1)*rect_width - DISPLAY_ONT_SIZE,   3 * (i+1) * ((i+1) - 15));//throw line
+//    }
+
+}
+
+void WinViewSummit::drawCoordinate(QPainter &painter)
+{
+    painter.drawLine(0,0,width(),0);
+    painter.drawLine(0,0,0,-height());
+
+    for(int i = 0; i < 9; i++){
+        // y axes;
+        painter.drawText(-30,- i * 25 ,QString::number(i * 500));
+        painter.drawLine(0,- i * 25,5,- i * 25);
+      }
+
+    int tmpWidth = width();
+    tmpWidth /= 21;
+    for(int i = 0; i < 50; i+=5){
+        // x axes;
+        int xPoint = (double)i/5 * tmpWidth;
+
+        painter.drawText(xPoint, 30, QString::number((double)i/10, 'f', 1));
+        painter.drawLine(xPoint, 0, xPoint, -5);
+        //painter.drawRoundRect();
+      }
 }
