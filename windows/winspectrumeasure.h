@@ -15,8 +15,10 @@ protected:
 
 private:
     QWidget paintFrame;
+    QTableWidget *p_tableWidget;
 
     void drawCoordinate(QPainter &painter);
+    void drawRect(QPainter &painter);
 };
 
 class WinSpectruMeasure : public WinAbstractFrame

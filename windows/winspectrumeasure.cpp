@@ -150,11 +150,10 @@ WinViewSummit::WinViewSummit(QTableWidget *tableWidget, QWidget *parent)
     Q_ASSERT(tableWidget != NULL);
     Q_ASSERT(tableWidget->rowCount() == 10);
     Q_ASSERT(tableWidget->columnCount() == 8);
+    p_tableWidget = tableWidget;
 
     setTitle(tr("View spectrum summit"));
     p_componentFactory = new MeasureFrameComponent(this);
-
-    qDebug() << tableWidget->rowCount();
 
     addWidget(&paintFrame);
     paintFrame.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -180,12 +179,7 @@ void WinViewSummit::paintEvent(QPaintEvent */*event*/)
     drawCoordinate(painter);
 
 
-//    for(int i = 0; i < 9; i++){
-//        // y axes;
-//        painter.drawText(-6* DISPLAY_ONT_SIZE,- i * 25 ,QString::number(i * 500));
-//        painter.drawLine(0,- i * 25,5,- i * 25);
-//        //painter.drawRoundRect();
-//      }
+
 //    for(int i = 1;i <= SPECTRUM_PAINTER_WIDTH ;i++){
 //        int value = -(*(spectrum_data + i - 1))/20;
 //        painter.drawLine(i*rect_width - rect_width/2 ,0,i*rect_width - rect_width/2,5);//坐标上的line
@@ -213,18 +207,28 @@ void WinViewSummit::drawCoordinate(QPainter &painter)
 
     for(int i = 0; i < 9; i++){
         // y axes;
-        painter.drawText(-30,- i * 25 ,QString::number(i * 500));
-        painter.drawLine(0,- i * 25,5,- i * 25);
+        int yPoint = - i * 25;
+        painter.drawText(-30,yPoint  + 5 ,QString::number(i * 500));//ｙ轴的倍数为五百当绘制柱状图时需要把得到的计数值除以５００
+        painter.drawLine(0, yPoint, 5, yPoint);
       }
 
-    int tmpWidth = width();
-    tmpWidth /= 21;
+    int tmpWidth = width() / 21;
     for(int i = 0; i < 50; i+=5){
         // x axes;
         int xPoint = (double)i/5 * tmpWidth;
-
-        painter.drawText(xPoint, 30, QString::number((double)i/10, 'f', 1));
+        painter.drawText(xPoint - 5, 30, QString::number((double)i/10, 'f', 1));
         painter.drawLine(xPoint, 0, xPoint, -5);
-        //painter.drawRoundRect();
-      }
+    }
+}
+
+void WinViewSummit::drawRect(QPainter &painter)
+{
+    int tmpWidth = width() / 21;
+    for(int row = 0; row < p_tableWidget->row(); row++)
+    {
+        for(int column = 0; column < p_tableWidget->column(); column += 2)
+        {
+
+        }
+    }
 }
