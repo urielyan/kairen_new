@@ -17,8 +17,8 @@ private:
     QWidget paintFrame;
     QTableWidget *p_tableWidget;
 
-    void drawCoordinate(QPainter &painter);
-    void drawRect(QPainter &painter);
+    void drawCoordinate(QPainter &painter, int rectWidth, int valueMultiplle);
+    void drawRect(QPainter &painter, int rectWidth, int valueMultiplle);
 };
 
 class WinSpectruMeasure : public WinAbstractFrame
@@ -36,10 +36,10 @@ private slots:
     void slotReadComData();
 
 private:
+    QTimer m_timer;
+
     QTableWidget *p_tableWidget;
     void initTableWidget();
-
-    QTimer m_timer;
 };
 
 #endif // SPECTRUMEASUREMENT_H

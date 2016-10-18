@@ -28,7 +28,8 @@ SOURCES += main.cpp\
     communication/qextserialbase.cpp \
     communication/com.cpp \
     windows/winmainframe.cpp \
-    common/datasave.cpp
+    common/datasave.cpp \
+    windows/querydata.cpp
 
 HEADERS  += mainwindow.h \
     common/wininforlistdialog.h \
@@ -47,4 +48,5 @@ HEADERS  += mainwindow.h \
     communication/qextserialbase.h \
     communication/com.h \
     windows/winmainframe.h \
-    common/datasave.h
+    common/datasave.h \
+    windows/querydata.h

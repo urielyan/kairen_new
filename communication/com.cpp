@@ -86,7 +86,7 @@ QByteArray Com::slotReadMyCom()
 //    qDebug() << QString::number(recvDataQint64, 16);
 #ifdef TEST_COM
     readData = getRecvData();
-    qDebug() << QString::number(readData.toInt(), 16);
+    qDebug() << QString::number(readData.toLongLong(), 16);
 #endif
 
     return readData;

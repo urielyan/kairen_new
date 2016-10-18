@@ -67,7 +67,6 @@ void WinSpectruMeasure::slotStartButtonClicked()
 
 void WinSpectruMeasure::slotStopbuttonClicked()
 {
-    qDebug() << __FILE__ << __LINE__;
     Com::instance()->sendOrder(Com::StopMeasure);
     m_timer.stop();
 }
@@ -131,7 +130,7 @@ void WinSpectruMeasure::initTableWidget()
 //    p_tableWidget->horizontalHeader()->setStretchLastSection(true);
 //    p_tableWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);//设置垂直滚动条显示模式
 //    p_tableWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);//设置水平滚动条显示模式
-    for(int i = 0; i < 8; i++)
+    for(int i = 0; i < p_tableWidget->columnCount(); i++)
     {
         if(i % 2 == 0)
         {
@@ -162,7 +161,6 @@ WinViewSummit::WinViewSummit(QTableWidget *tableWidget, QWidget *parent)
 
 void WinViewSummit::paintEvent(QPaintEvent */*event*/)
 {
-    int rect_width = this->width()/130;
     int side = qMin(width(), height());                                           //创建窗口宽高参数
     QPainter painter(this);
     painter.setViewport(paintFrame.rect());
@@ -176,59 +174,58 @@ void WinViewSummit::paintEvent(QPaintEvent */*event*/)
     painter.setBrush(Qt::cyan);
     painter.setFont(QFont("Times", 10));
 
-    drawCoordinate(painter);
-
-
-
-//    for(int i = 1;i <= SPECTRUM_PAINTER_WIDTH ;i++){
-//        int value = -(*(spectrum_data + i - 1))/20;
-//        painter.drawLine(i*rect_width - rect_width/2 ,0,i*rect_width - rect_width/2,5);//坐标上的line
-//        if((i-1) % 5 == 0)painter.drawText(i*rect_width  - DISPLAY_ONT_SIZE * 2,10,QString::number((double)(i-1)/10,'f',1));//坐标上的值
-
-//        if(i == different_display_color){
-//            painter.setBrush(Qt::blue);
-//            painter.drawRect((i-1)*rect_width,0\
-//                             ,rect_width,value);
-//            painter.setBrush(Qt::cyan);
-//            continue;
-//          }
-//        painter.drawRect((i-1)*rect_width,0\
-//                         ,rect_width,value);
-//        //painter.drawText((i-1)*rect_width + DISPLAY_ONT_SIZE/2 - 1,value - 4 ,QString::number(*(spectrum_data + i - 1)));//柱状图上的值
-//        //painter.drawLine(i*rect_width - DISPLAY_ONT_SIZE,3 * i * (i - 15),(i + 1)*rect_width - DISPLAY_ONT_SIZE,   3 * (i+1) * ((i+1) - 15));//throw line
-//    }
-
+    int rectWidth = width() / 100;
+    int valueMultiplle = 20;
+    drawCoordinate(painter, rectWidth, valueMultiplle);
+    drawRect(painter, rectWidth, valueMultiplle);
 }
 
-void WinViewSummit::drawCoordinate(QPainter &painter)
+void WinViewSummit::drawCoordinate(QPainter &painter, int rectWidth, int valueMultiplle)
 {
-    painter.drawLine(0,0,width(),0);
-    painter.drawLine(0,0,0,-height());
+    painter.drawLine(0, 0, width(), 0);
+    painter.drawLine(0, 0, 0, -height());
 
     for(int i = 0; i < 9; i++){
         // y axes;
-        int yPoint = - i * 25;
-        painter.drawText(-30,yPoint  + 5 ,QString::number(i * 500));//ｙ轴的倍数为五百当绘制柱状图时需要把得到的计数值除以５００
+        int yPoint = - i * height() / 12;
+        painter.drawText(-30, yPoint  + 5, QString::number(- yPoint * valueMultiplle));//ｙ轴的倍数为五百当绘制柱状图时需要把得到的计数值除以５００
         painter.drawLine(0, yPoint, 5, yPoint);
       }
 
-    int tmpWidth = width() / 21;
     for(int i = 0; i < 50; i+=5){
         // x axes;
-        int xPoint = (double)i/5 * tmpWidth;
+        int xPoint = (double)i * rectWidth;
         painter.drawText(xPoint - 5, 30, QString::number((double)i/10, 'f', 1));
         painter.drawLine(xPoint, 0, xPoint, -5);
     }
 }
 
-void WinViewSummit::drawRect(QPainter &painter)
+void WinViewSummit::drawRect(QPainter &painter, int rectWidth, int valueMultiplle)
 {
-    int tmpWidth = width() / 21;
-    for(int row = 0; row < p_tableWidget->row(); row++)
+#ifdef TEST_COM
+    for(int column = 0; column < p_tableWidget->columnCount(); column += 2)
     {
-        for(int column = 0; column < p_tableWidget->column(); column += 2)
+        for(int row = 0; row < p_tableWidget->rowCount(); row++)
         {
-
+            p_tableWidget->setItem(row, column, new QTableWidgetItem(QString::number((double)(column * 10 / 2 + row + 4)/10)));
+            p_tableWidget->setItem(row, column + 1, new QTableWidgetItem(QString::number(row * 200 + column * 300)));
+        }
+    }
+#endif
+    for(int row = 0; row < p_tableWidget->rowCount(); row++)
+    {
+        for(int column = 0; column < p_tableWidget->columnCount(); column += 2)
+        {
+            double value = 0.0;
+            double count = 0;
+            if(p_tableWidget->item(row, column) != NULL)
+            {
+                value = p_tableWidget->item(row, column)->text().toDouble();
+                count = p_tableWidget->item(row, column + 1)->text().toInt();
+            }
+            int xPoint = value * 10 * rectWidth;
+            int yPoint = - count / valueMultiplle ;
+            painter.drawRect(QRect(QPoint(xPoint - 2, yPoint), QPoint(xPoint + 2, 0)));
         }
     }
 }

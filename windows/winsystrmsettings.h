@@ -3,6 +3,7 @@
 
 #include "winabstractframe.h"
 #include <QButtonGroup>
+
 class ButtonWinMannager;
 
 
@@ -44,13 +45,13 @@ class WinSystrmSettings : public WinAbstractFrame
 
 public:
     enum WinId{
-        Spectrum = 0,
-        Count,
-        Calibrate,
-        SetDateTime,
-        ChangePasswd
+        Spectrum = 0
+        ,Count
+        ,Calibrate
+        ,SetDateTime
+        ,ChangePasswd
     };
-    WinSystrmSettings(QWidget *parent = 0);
+    explicit WinSystrmSettings(QWidget *parent = 0);
 
 private slots:
     void slotChangePasswdClicked();

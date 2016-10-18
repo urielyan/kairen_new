@@ -20,6 +20,9 @@
 //计数相关
 #define MYSETTINGS_COUNT_COUNT QString("count_count")
 #define MYSETTINGS_COUNT_DATA(x) QString("count_data").append(QString::number((x)))
+#define MYSETTINGS_COUNT_DATA_LAMBDA(x) QString("count_data_lambda_").append(QString::number((x)))
+#define MYSETTINGS_COUNT_DATA_AVERAGE(x) QString("count_data_average_").append(QString::number((x)))
+#define MYSETTINGS_COUNT_DATA_DateTime(x) QString("count_data_datetime_").append(QString::number((x)))
 
 //含量测量相关：
 #define MYSETTINGS_SAMPLE_COUNT QString("sample_count")
@@ -42,62 +45,51 @@
 
 #define MYSETTINGS_PROPORTION(x) QString("proportion_").append(QString::number((x)))
 
+#define MYSETTINGS_COM_ERR(x) QString("com_err").append(QString::number((x)))
+
 class AbstractDataSave
 {
 public:
-  virtual QVariant value(QString key) = 0;
-  virtual void setValue(QString key, qint64 value) = 0;
-  virtual void setValue(QString key, QString value)  = 0;
-  virtual void addCount(uint /*which*/) = 0;
-
+    virtual QVariant value(QString key);
+    virtual void setValue(QString key, qint64 value);
+    virtual void setValue(QString key, QString value);
+    virtual void addCount(uint /*which*/);
     virtual void remove(QString key);
     virtual bool contains(QString key);
 
 protected:
     QSettings *settings;
+
+    bool test();
 };
 
 class MeasurementDataSave : public AbstractDataSave
 {
 
 public:
-  static MeasurementDataSave *instance();
-
-public:
-  bool test();
-  QVariant value(QString key);
-  void setValue(QString key, qint64 value);
-  void setValue(QString key, QString value);
-  void addCount(uint /*which*/);
-
-protected:
-  //virtual void init() = 0;
-  //QSettings *settings;
-
+    static MeasurementDataSave *instance();
 private:
-  MeasurementDataSave();
-  void init();
+    MeasurementDataSave();
+    void init();
 };
 
 class ErrorCountSave : public AbstractDataSave
 {
 public:
-  static ErrorCountSave *instance();
-
-  void addCount(uint which);
-
-public:
-  bool test();
-  QVariant value(QString key);
-  void setValue(QString key, qint64 value);
-  void setValue(QString key, QString value);
-
-protected:
-  //virtual void init() = 0;
-
+    static ErrorCountSave *instance();
+    void addCount(uint which) Q_DECL_OVERRIDE;
 
 private:
-  ErrorCountSave();
-  void init();
+    ErrorCountSave();
+    void init();
+};
+
+class CountDataSave : public AbstractDataSave
+{
+public:
+    static CountDataSave *instance();
+private:
+    CountDataSave();
+    void init();
 };
 #endif // DATASAVE_H

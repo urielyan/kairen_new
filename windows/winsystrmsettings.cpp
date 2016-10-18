@@ -3,7 +3,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include<QLabel>
+#include <QLabel>
 #include <QDateTime>
 
 #include "common/global.h"

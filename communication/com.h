@@ -40,15 +40,14 @@ private:
     QextSerialBase *myCom;
     QTimer *readTimer;
 
-public:
-    //test
-#define TEST_COM
 
+#define TEST_COM  //test
 #ifdef TEST_COM
+public:
     QByteArray testData;
     void setRecvData(QByteArray data);
     QByteArray getRecvData();
-#endif
+#endif // test end
 };
 
 #endif // COM_H
