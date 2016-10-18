@@ -63,7 +63,7 @@ WinSystrmSettings::WinSystrmSettings(QWidget *parent)
 
 void WinSystrmSettings::slotChangePasswdClicked()
 {
-    NumberInput input;
+    NumberInput input(this);
     if(input.exec() == QDialog::Accepted)
     {
         QString inputString = input.getString();
@@ -80,14 +80,12 @@ WinSetDateTime::WinSetDateTime(QWidget *parent) :
     WinAbstractFrame(parent)
 {
     setTitle(tr("Set Date time"));
-    //this->setFixedSize(800, 480);
     QHBoxLayout *p_HLayoutSetDateTime = new QHBoxLayout;
 
     QList<QLabel*> m_labelListUnit;
     for(int i = 0; i < 5; i++)
     {
-        QVBoxLayout *p_VLayout = new QVBoxLayout;
-        QPushButton *p_upButton =  new QPushButton(this);
+        QPushButton *p_upButton =  p_componentFactory->getButton(tr("Start"), this);
         p_upButton->setObjectName("upbutton");
         m_buttonGroupUp.addButton(p_upButton, i);
         p_upButton->setText("+");
@@ -104,15 +102,16 @@ WinSetDateTime::WinSetDateTime(QWidget *parent) :
         p_LabelUnit->setFont(QFont(FONT_NAME, FONT_SIZE - 10));
         p_LabelUnit->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
-        QHBoxLayout *p_HBoxLabel =  new QHBoxLayout(p_middleFrame);
+        QBoxLayout *p_HBoxLabel =  p_componentFactory->getBoxLayout(QBoxLayout::LeftToRight);
         p_HBoxLabel->addWidget(p_Label);
         p_HBoxLabel->addWidget(p_LabelUnit);
 
-        QPushButton *p_bottomButton = new QPushButton(this);
+        QPushButton *p_bottomButton = p_componentFactory->getButton(tr(""), this);
         m_buttonGroupDown.addButton(p_bottomButton, i);
         p_bottomButton->setObjectName("bottombutton");
         p_bottomButton->setText("-");
 
+        QBoxLayout *p_VLayout = p_componentFactory->getBoxLayout(QBoxLayout::TopToBottom);
         p_VLayout->addWidget(p_upButton);
         p_VLayout->addWidget(p_middleFrame);
         p_VLayout->addWidget(p_bottomButton);
@@ -128,32 +127,16 @@ WinSetDateTime::WinSetDateTime(QWidget *parent) :
     connect(&m_buttonGroupUp, SIGNAL(buttonClicked(int)), this, SLOT(slotButtonUpClicked(int)));
     connect(&m_buttonGroupDown, SIGNAL(buttonClicked(int)), this, SLOT(slotButtonDownClicked(int)));
 
-
-    QPushButton *p_SaveButton = new QPushButton(tr("保存"));
+    QBoxLayout *p_HLayoutCancelSave =p_componentFactory->getBoxLayout(QBoxLayout::LeftToRight);
+    QPushButton *p_SaveButton = p_componentFactory->getButton(tr("Save"), this);
     connect(p_SaveButton, SIGNAL(clicked(bool)), this, SLOT(slotSaveButtonClicked()));
-
-    QHBoxLayout *p_HLayoutCancelSave = new QHBoxLayout;
-    p_HLayoutCancelSave->addWidget(getReturnButton());
     p_HLayoutCancelSave->addWidget(p_SaveButton);
-
-    QLabel *p_label = new QLabel(tr("设置时间"));
-    p_label->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
-    p_label->setObjectName("title");
-    p_label->setAlignment(Qt::AlignHCenter | Qt::AlignCenter);
+    p_HLayoutCancelSave->addWidget(getReturnButton());
 
     addLayout(p_HLayoutSetDateTime);
     addLayout(p_HLayoutCancelSave);
 
     setLabelCurrentDateTime();
-    this->setStyleSheet("QFrame#label{max-height: 80;min-height:50;"
-                        "background-color:rgb(200, 200, 200);border:1px solid, black; border-radius: 30px;}"
-                        "QPushButton{min-height: 60;}"
-                        "QPushButton#bottombutton, QPushButton#upbutton{text-align:center;}");
-
-    INIT_LABEL_SIZE_FONT;
-    p_label->setFont(QFont(FONT_NAME, FONT_SIZE * 2 ,QFont::Normal));
-    p_label->setObjectName("title");
-
 }
 
 void WinSetDateTime::slotSaveButtonClicked()
