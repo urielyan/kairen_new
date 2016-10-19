@@ -18,11 +18,12 @@
 #define MYSETTINGS_CALIBRATE_RESULT_REAL_KBR(x) QString("real_compute_kbr_1").append(QString::number((x)))
 
 //计数相关
+#define MYSETTINGS_COUNT_MAX_COUNT 1000
 #define MYSETTINGS_COUNT_COUNT QString("count_count")
 #define MYSETTINGS_COUNT_DATA(x) QString("count_data").append(QString::number((x)))
 #define MYSETTINGS_COUNT_DATA_LAMBDA(x) QString("count_data_lambda_").append(QString::number((x)))
 #define MYSETTINGS_COUNT_DATA_AVERAGE(x) QString("count_data_average_").append(QString::number((x)))
-#define MYSETTINGS_COUNT_DATA_DateTime(x) QString("count_data_datetime_").append(QString::number((x)))
+#define MYSETTINGS_COUNT_DATA_DATETIME(x) QString("count_data_datetime_").append(QString::number((x)))
 
 //含量测量相关：
 #define MYSETTINGS_SAMPLE_COUNT QString("sample_count")
@@ -90,6 +91,15 @@ public:
     static CountDataSave *instance();
 private:
     CountDataSave();
+    void init();
+};
+
+class CalibrateDataSave : public AbstractDataSave
+{
+public:
+    static CalibrateDataSave *instance();
+private:
+    CalibrateDataSave();
     void init();
 };
 #endif // DATASAVE_H

@@ -35,3 +35,49 @@ WinCalibrateMeasure::WinCalibrateMeasure(QWidget *parent)
         addLayout(p_hBoxLayout);
     }
 }
+
+CalibrateMeasure::CalibrateMeasure(QWidget *parent)
+{
+    setTitle(tr("Calibrate measure"));
+    p_componentFactory = new MeasureFrameComponent(this);
+
+    initMeasureLabel();
+    initbutton();
+
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(slotReadComData()));
+
+}
+
+void CalibrateMeasure::init()
+{
+
+}
+
+void CalibrateMeasure::slotStartButtonClicked()
+{
+
+}
+
+void CalibrateMeasure::slotStopButtonClicked()
+{
+
+}
+
+void CalibrateMeasure::slotQueryButtonClicked()
+{
+
+}
+
+void CalibrateMeasure::slotReadComData()
+{
+
+}
+
+void CalibrateMeasure::initMeasureLabel()
+{
+}
+
+void CalibrateMeasure::initbutton()
+{
+
+}

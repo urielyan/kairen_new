@@ -40,6 +40,7 @@ class WinCountMeasure : public WinAbstractFrame
 public:
     enum ButtonId{
         Start = 0
+        ,RepeatMeasure
         ,Stop
         ,Query
         ,InPlate
@@ -51,11 +52,13 @@ public:
 
 private slots:
     void slotStartButtonClicked();
-    void slotStopbuttonClicked();
+    void slotRepeatMeasureButtonClicked();
+    void slotStopButtonClicked();
     void slotQueryButtonClicked();
     void slotReadComData();
 
 private:
+    bool m_flagRepeatMeasure;
     QTimer m_timer;
     QueryCountMeasure m_queryCountMeasure;
 
@@ -63,7 +66,6 @@ private:
     QLabel m_currentTimeLabel;
     QLabel m_remainingTimelabel;
     void setChangeLabel(uint currentTime = 1, uint remainingTime = 31);
-    void addChangeLabel();
     void clearChangeLabel();
 
     QButtonGroup m_buttonGroup;
@@ -74,7 +76,6 @@ private:
 
     void initMeasureLabel();
     void initbutton();
-
 };
 
 #endif // WINCOUNTMEASURE_H

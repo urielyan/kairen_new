@@ -29,7 +29,7 @@ SOURCES += main.cpp\
     communication/com.cpp \
     windows/winmainframe.cpp \
     common/datasave.cpp \
-    windows/querydata.cpp
+    windows/winquerydata.cpp
 
 HEADERS  += mainwindow.h \
     common/wininforlistdialog.h \
@@ -49,4 +49,4 @@ HEADERS  += mainwindow.h \
     communication/com.h \
     windows/winmainframe.h \
     common/datasave.h \
-    windows/querydata.h
+    windows/winquerydata.h

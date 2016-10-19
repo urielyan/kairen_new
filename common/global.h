@@ -3,9 +3,14 @@
 
 #include <QApplication>
 #include  <QDesktopWidget>
+
+#ifdef __arm__
 #define DESKTOP_WIDTH   QApplication::desktop()->width()
 #define DESKTOP_HEIGHT QApplication::desktop()->height()
-
+#else
+#define DESKTOP_WIDTH   800
+#define DESKTOP_HEIGHT 480
+#endif
 //#define FRIENDLYARM_TINY210
 #define FORLIN_OK335XS
 

@@ -4,6 +4,7 @@
 #include "winabstractframe.h"
 
 class ButtonWinMannager;
+class QTableWidget;
 
 class WinQueryCountData : public WinAbstractFrame
 {
@@ -12,11 +13,18 @@ class WinQueryCountData : public WinAbstractFrame
 public:
     explicit WinQueryCountData(QWidget *parent = 0);
 
-private:
+private slots:
+    void slotUpdateButtonClicked();
+    void slotNetxButtonClicked();
+    void slotPreviousButtonClicked();
 
+private:
+    QTableWidget *p_tableWidget;
+    void initTableWidget();
+    void setTableWidget(uint id);
 };
 
-class QueryData : public WinAbstractFrame
+class WinQueryData : public WinAbstractFrame
 {
     Q_OBJECT
 
@@ -26,7 +34,7 @@ public:
         ,Count
         ,Calibrate
     };
-    explicit QueryData(QWidget *parent = 0);
+    explicit WinQueryData(QWidget *parent = 0);
 
 private slots:
 

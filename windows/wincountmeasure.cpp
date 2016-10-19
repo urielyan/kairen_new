@@ -13,6 +13,7 @@
 
 WinCountMeasure::WinCountMeasure(QWidget *parent)
     : WinAbstractFrame(parent)
+    ,m_flagRepeatMeasure(false)
 {
     setTitle(tr("count measure"));
     p_componentFactory = new MeasureFrameComponent(this);
@@ -56,13 +57,20 @@ void WinCountMeasure::slotStartButtonClicked()
     m_countData.clear();
 
     Com::instance()->sendOrder(Com::CountMeasure);
-    m_timer.start(10);
+    m_timer.start(1);
 }
 
-void WinCountMeasure::slotStopbuttonClicked()
+void WinCountMeasure::slotRepeatMeasureButtonClicked()
+{
+    slotStartButtonClicked();
+    m_flagRepeatMeasure = true;
+}
+
+void WinCountMeasure::slotStopButtonClicked()
 {
     Com::instance()->sendOrder(Com::StopMeasure);
     init();
+    m_flagRepeatMeasure = false;
 }
 
 void WinCountMeasure::slotQueryButtonClicked()
@@ -72,20 +80,6 @@ void WinCountMeasure::slotQueryButtonClicked()
 }
 
 void WinCountMeasure::slotReadComData()
-{
-    addChangeLabel();
-}
-
-void WinCountMeasure::setChangeLabel(uint currentTime, uint remainingTime)
-{
-    Q_ASSERT(currentTime < 12);
-    Q_ASSERT(remainingTime < 32);
-
-    m_currentTimeLabel.setText(m_timeMap[currentTime]);
-    m_remainingTimelabel.setText(tr("Remaining %1 seconds").arg(remainingTime));
-}
-
-void WinCountMeasure::addChangeLabel()
 {
     QString currentTimeString = m_currentTimeLabel.text();
     uint currentTime = m_timeMap.key(currentTimeString, 1);
@@ -108,6 +102,12 @@ void WinCountMeasure::addChangeLabel()
         {
             slotQueryButtonClicked();
             init();
+            if(m_flagRepeatMeasure)
+            {
+                slotStopButtonClicked();
+                slotRepeatMeasureButtonClicked();
+                MainWindow::instance()->slotCloseTopWidget();
+            }
             return;
         }
         remainTime = 31;
@@ -115,6 +115,16 @@ void WinCountMeasure::addChangeLabel()
 
     setChangeLabel(currentTime, --remainTime);
 }
+
+void WinCountMeasure::setChangeLabel(uint currentTime, uint remainingTime)
+{
+    Q_ASSERT(currentTime < 12);
+    Q_ASSERT(remainingTime < 32);
+
+    m_currentTimeLabel.setText(m_timeMap[currentTime]);
+    m_remainingTimelabel.setText(tr("Remaining %1 seconds").arg(remainingTime));
+}
+
 
 void WinCountMeasure::clearChangeLabel()
 {
@@ -158,7 +168,6 @@ void WinCountMeasure::readComData()
 
     uint which = (int)recvData[2] * 10 + (int)recvData[3] - 4;
 
-    QString value = QString::number((double)(which + 4)/10, 'f', 1);//以小树形式显示阈值,只显示一位小数点.
     QString count = recvData.mid(4, 5);
     m_countData.append(count.toUInt());
 }
@@ -187,8 +196,12 @@ void WinCountMeasure::initbutton()
         connect(p_startButton, SIGNAL(clicked(bool)), this, SLOT(slotStartButtonClicked()));
         p_buttonLayout->addWidget(p_startButton);
 
+        QPushButton *p_repeatMeasureButton = p_componentFactory->getButton(tr("Repeat measure"), this);
+        connect(p_repeatMeasureButton, SIGNAL(clicked(bool)), this, SLOT(slotRepeatMeasureButtonClicked()));
+        p_buttonLayout->addWidget(p_repeatMeasureButton);
+
         QPushButton *p_stopButton = p_componentFactory->getButton(tr("Stop"), this);
-        connect(p_stopButton, SIGNAL(clicked(bool)), this, SLOT(slotStopbuttonClicked()));
+        connect(p_stopButton, SIGNAL(clicked(bool)), this, SLOT(slotStopButtonClicked()));
         p_buttonLayout->addWidget(p_stopButton);
 
         QPushButton *p_queryButton = p_componentFactory->getButton(tr("Query"), this);
@@ -205,6 +218,8 @@ void WinCountMeasure::initbutton()
         p_buttonLayout->addWidget(p_returnButton);
 
         m_buttonGroup.addButton(p_startButton, Start);
+        m_buttonGroup.addButton(p_repeatMeasureButton, RepeatMeasure);
+//        m_buttonGroup.addButton(p_stopButton, Stop);
         m_buttonGroup.addButton(p_inPlatebutton, InPlate);
         m_buttonGroup.addButton(p_outPlatebutton, OutPlate);
         m_buttonGroup.addButton(p_returnButton, Return);
@@ -297,13 +312,13 @@ void QueryCountMeasure::initLabel()
 void QueryCountMeasure::saveData(int average, double lambda)
 {
     uint count =  CountDataSave::instance()->value(MYSETTINGS_COUNT_COUNT).toUInt() + 1;
-    if(count > 1000)
+    if(count > MYSETTINGS_COUNT_MAX_COUNT)
     {
         count = 1;
     }
     CountDataSave::instance()->setValue(MYSETTINGS_COUNT_DATA_AVERAGE(count), average);
     CountDataSave::instance()->setValue(MYSETTINGS_COUNT_DATA_LAMBDA(count), lambda);
-    CountDataSave::instance()->setValue(MYSETTINGS_COUNT_DATA_LAMBDA(count),
+    CountDataSave::instance()->setValue(MYSETTINGS_COUNT_DATA_DATETIME(count),
                                         QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss"));
     CountDataSave::instance()->setValue(MYSETTINGS_COUNT_COUNT,count);
 }

@@ -82,7 +82,8 @@ WinSetDateTime::WinSetDateTime(QWidget *parent) :
     setTitle(tr("Set Date time"));
     QHBoxLayout *p_HLayoutSetDateTime = new QHBoxLayout;
 
-    QList<QLabel*> m_labelListUnit;
+    QList<QLabel *> m_labelListUnit;
+
     for(int i = 0; i < 5; i++)
     {
         QPushButton *p_upButton =  p_componentFactory->getButton(tr("Start"), this);
@@ -92,7 +93,7 @@ WinSetDateTime::WinSetDateTime(QWidget *parent) :
 
 
         QFrame *p_middleFrame = new QFrame(this);
-        p_middleFrame->setObjectName("label");
+        QBoxLayout *middleFrameLayout=  p_componentFactory->getBoxLayout(QBoxLayout::LeftToRight, p_middleFrame);
         QLabel *p_Label = new QLabel(p_middleFrame);
         p_Label->setFont(QFont(FONT_NAME, FONT_SIZE));
         m_labelList.append(p_Label);
@@ -101,10 +102,12 @@ WinSetDateTime::WinSetDateTime(QWidget *parent) :
         m_labelListUnit.append(p_LabelUnit);
         p_LabelUnit->setFont(QFont(FONT_NAME, FONT_SIZE - 10));
         p_LabelUnit->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        middleFrameLayout->addWidget(p_Label);
+        middleFrameLayout->addWidget(p_LabelUnit);
 
-        QBoxLayout *p_HBoxLabel =  p_componentFactory->getBoxLayout(QBoxLayout::LeftToRight);
-        p_HBoxLabel->addWidget(p_Label);
-        p_HBoxLabel->addWidget(p_LabelUnit);
+//        QBoxLayout *p_HBoxLabel =  p_componentFactory->getBoxLayout(QBoxLayout::LeftToRight);
+//        p_HBoxLabel->addWidget(p_Label);
+//        p_HBoxLabel->addWidget(p_LabelUnit);
 
         QPushButton *p_bottomButton = p_componentFactory->getButton(tr(""), this);
         m_buttonGroupDown.addButton(p_bottomButton, i);
@@ -119,11 +122,12 @@ WinSetDateTime::WinSetDateTime(QWidget *parent) :
         p_HLayoutSetDateTime->addLayout(p_VLayout);
 
     }
-    m_labelListUnit.value(YEAR)->setText(tr("年"));
-    m_labelListUnit.value(MONTH)->setText(tr("月"));
-    m_labelListUnit.value(DAY)->setText(tr("日"));
-    m_labelListUnit.value(HOUR)->setText(tr("时"));
-    m_labelListUnit.value(MINUTE)->setText(tr("分"));
+    m_labelListUnit[YEAR]->setText(tr("年"));
+    m_labelListUnit[MONTH]->setText(tr("月"));
+    m_labelListUnit[DAY]->setText(tr("日"));
+    m_labelListUnit[HOUR]->setText(tr("时"));
+    m_labelListUnit[MINUTE]->setText(tr("分"));
+
     connect(&m_buttonGroupUp, SIGNAL(buttonClicked(int)), this, SLOT(slotButtonUpClicked(int)));
     connect(&m_buttonGroupDown, SIGNAL(buttonClicked(int)), this, SLOT(slotButtonDownClicked(int)));
 
@@ -170,7 +174,7 @@ void WinSetDateTime::showRefresh(){
 
 void WinSetDateTime::slotButtonUpClicked(int id)
 {
-    int m_labelNumber = m_labelList.value(id)->text().toInt() + 1;
+    int m_labelNumber = m_labelList[id]->text().toInt() + 1;
     switch (id) {
     case YEAR:
     {
@@ -214,13 +218,13 @@ void WinSetDateTime::slotButtonUpClicked(int id)
     default:
         break;
     }
-    m_labelList.value(id)->setText(QString::number(m_labelNumber));
+    m_labelList[id]->setText(QString::number(m_labelNumber));
     examineDayLabelIsRight();
 }
 
 void WinSetDateTime::slotButtonDownClicked(int id)
 {
-    int m_labelNumber = m_labelList.value(id)->text().toInt() - 1;
+    int m_labelNumber = m_labelList[id]->text().toInt() - 1;
     switch (id) {
     case YEAR:
     {
@@ -264,7 +268,7 @@ void WinSetDateTime::slotButtonDownClicked(int id)
     default:
         break;
     }
-    m_labelList.value(id)->setText(QString::number(m_labelNumber));
+    m_labelList[id]->setText(QString::number(m_labelNumber));
     examineDayLabelIsRight();
 }
 

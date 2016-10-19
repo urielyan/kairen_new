@@ -239,3 +239,35 @@ void CountDataSave::init()
         settings->setValue(MYSETTINGS_COUNT_COUNT, 0);
     }
 }
+
+CalibrateDataSave *CalibrateDataSave::instance()
+{
+    static CalibrateDataSave _instance;
+    return &_instance;
+}
+
+CalibrateDataSave::CalibrateDataSave()
+{
+    settings = new QSettings("./QSettings/calibrateData.settings", QSettings::NativeFormat);
+
+    if(!test())
+    {
+        settings = new QSettings("./QSettings/calibrateData.settings", QSettings::NativeFormat);
+    }
+    Q_ASSERT(test() == true);
+
+    init();
+}
+
+void CalibrateDataSave::init()
+{
+    if(!settings->contains(MYSETTINGS_CALIBRATE_COUNT))
+    {
+        settings->setValue(MYSETTINGS_CALIBRATE_COUNT, 0);
+    }
+
+    if(!settings->contains(MYSETTINGS_CALIBRATE_RESULT_COUNT))
+    {
+        settings->setValue(MYSETTINGS_CALIBRATE_RESULT_COUNT, 0);
+    }
+}
