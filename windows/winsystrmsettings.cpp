@@ -1,3 +1,15 @@
+#include "common/numberinput.h"
+#include "common/global.h"
+#include "common/wininforlistdialog.h"
+#include "common/abstractfactory.h"
+
+#include "buttonwinmannager.h"
+#include "winsystrmsettings.h"
+#include "mainwindow.h"
+#include "winspectrumeasure.h"
+#include "wincountmeasure.h"
+#include "wincalibratemeasure.h"
+
 #include <QButtonGroup>
 #include <QMessageBox>
 #include <QHBoxLayout>
@@ -5,18 +17,6 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QDateTime>
-
-#include "common/global.h"
-#include "common/wininforlistdialog.h"
-#include "common/abstractfactory.h"
-#include "common/buttonwinmannager.h"
-
-#include "winsystrmsettings.h"
-#include "mainwindow.h"
-#include "winspectrumeasure.h"
-#include "wincountmeasure.h"
-#include "wincalibratemeasure.h"
-#include "common/numberinput.h"
 
 WinSystrmSettings::WinSystrmSettings(QWidget *parent)
     :WinAbstractFrame(parent)

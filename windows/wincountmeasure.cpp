@@ -1,15 +1,14 @@
-#include <QTableWidget>
-#include <QtMath>
-#include <QDateTime>
+#include "common/abstractfactory.h"
+#include "common/datasave.h"
+#include "common/wininforlistdialog.h"
+#include "communication/com.h"
 
 #include "mainwindow.h"
 #include "wincountmeasure.h"
 
-#include "common/abstractfactory.h"
-#include "common/datasave.h"
-#include "common/wininforlistdialog.h"
-
-#include "communication/com.h"
+#include <QTableWidget>
+#include <QtMath>
+#include <QDateTime>
 
 WinCountMeasure::WinCountMeasure(QWidget *parent)
     : WinAbstractFrame(parent)
@@ -166,7 +165,7 @@ void WinCountMeasure::readComData()
         return;
     }
 
-    uint which = (int)recvData[2] * 10 + (int)recvData[3] - 4;
+    //uint which = (int)recvData[2] * 10 + (int)recvData[3] - 4;
 
     QString count = recvData.mid(4, 5);
     m_countData.append(count.toUInt());

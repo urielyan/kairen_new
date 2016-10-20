@@ -15,7 +15,7 @@ TEMPLATE = app
 SOURCES += main.cpp\
     common/wininforlistdialog.cpp \
     common/abstractfactory.cpp \
-    common/buttonwinmannager.cpp \
+    windows/buttonwinmannager.cpp \
     windows/mainwindow.cpp \
     windows/statusbar.cpp \
     windows/winabstractframe.cpp \
@@ -34,7 +34,7 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     common/wininforlistdialog.h \
     common/abstractfactory.h \
-    common/buttonwinmannager.h \
+    windows/buttonwinmannager.h \
     common/global.h \
     windows/mainwindow.h \
     windows/statusbar.h \

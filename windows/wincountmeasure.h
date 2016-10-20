@@ -63,8 +63,8 @@ private:
     QueryCountMeasure m_queryCountMeasure;
 
     QMap <int, QString> m_timeMap;
-    QLabel m_currentTimeLabel;
-    QLabel m_remainingTimelabel;
+    QLabel m_currentTimeLabel; //当前次数
+    QLabel m_remainingTimelabel; //本次测量剩下的时间
     void setChangeLabel(uint currentTime = 1, uint remainingTime = 31);
     void clearChangeLabel();
 

@@ -1,3 +1,9 @@
+#include "common/global.h"
+#include "common/wininforlistdialog.h"
+#include "common/abstractfactory.h"
+#include "windows/buttonwinmannager.h"
+#include "common/datasave.h"
+
 #include "winquerydata.h"
 
 #include <QButtonGroup>
@@ -7,12 +13,6 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QTableWidget>
-
-#include "common/global.h"
-#include "common/wininforlistdialog.h"
-#include "common/abstractfactory.h"
-#include "common/buttonwinmannager.h"
-#include "common/datasave.h"
 
 WinQueryData::WinQueryData(QWidget *parent)
     : WinAbstractFrame(parent)

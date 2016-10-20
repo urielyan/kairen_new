@@ -1,11 +1,12 @@
-﻿#include <QLineEdit>
+﻿#include "abstractfactory.h"
+
+#include "numberinput.h"
+
+#include <QLineEdit>
 #include <QBoxLayout>
 #include <QPushButton>
 #include <QString>
 #include <QButtonGroup>
-
-#include "numberinput.h"
-#include "abstractfactory.h"
 
 NumberInput::NumberInput(QWidget *parent)
     : QDialog(parent)

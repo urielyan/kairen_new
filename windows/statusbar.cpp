@@ -1,8 +1,8 @@
-#include <unistd.h>
-
-#include "statusbar.h"
 #include "common/global.h"
 
+#include "statusbar.h"
+
+#include <unistd.h>
 
 extern int measurement_flag;
 #define PWM_IOCTL_SET_FREQ	1

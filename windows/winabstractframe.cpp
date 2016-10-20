@@ -1,14 +1,13 @@
-#include <QPushButton>
+#include"common/global.h"
+#include "common/abstractfactory.h"
+#include "common/wininforlistdialog.h"
+#include "communication/com.h"
 
 #include "winabstractframe.h"
 #include "mainwindow.h"
 #include "statusbar.h"
 
-#include"common/global.h"
-#include "common/abstractfactory.h"
-#include "common/wininforlistdialog.h"
-
-#include "communication/com.h"
+#include <QPushButton>
 
 WinAbstractFrame::WinAbstractFrame(QWidget *parent)
     : QFrame(parent)

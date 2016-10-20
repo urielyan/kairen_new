@@ -1,8 +1,6 @@
 #ifndef WININFORLISTDIALOG_H
 #define WININFORLISTDIALOG_H
 
-#include <QObject>
-#include <QWidget>
 #include <QDialog>
 #include <QLabel>
 
@@ -12,11 +10,7 @@ class WinInforListDialog : public QDialog
 public:
   static WinInforListDialog *instance();
 
-  void showMsg(QString text);
-  void showMsg(qint32 id);
-
-  QString doubleToCompleteDouble(double num);
-  QString intToCompleteInt(int num);
+  void showMsg(QString text, QString informativeText = "");
 signals:
 
 public slots:

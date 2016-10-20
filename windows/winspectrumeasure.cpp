@@ -1,3 +1,11 @@
+#include "common/abstractfactory.h"
+#include "common/wininforlistdialog.h"
+#include "common/datasave.h"
+#include "communication/com.h"
+
+#include "mainwindow.h"
+#include "winspectrumeasure.h"
+
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QTableWidgetItem>
@@ -5,15 +13,6 @@
 #include <QByteArray>
 #include <QPaintEvent>
 #include <QPainter>
-
-#include "mainwindow.h"
-#include "winspectrumeasure.h"
-
-#include "common/abstractfactory.h"
-#include "common/wininforlistdialog.h"
-#include "common/datasave.h"
-
-#include "communication/com.h"
 
 WinSpectruMeasure::WinSpectruMeasure(QWidget *parent)
     :WinAbstractFrame(parent)

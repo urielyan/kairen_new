@@ -1,8 +1,6 @@
 #ifndef DATASAVE_H
 #define DATASAVE_H
 #include <QApplication>
-#include <QDebug>
-#include <QSettings>
 
 //标定相关：
 //记录标定了几组数据。0-12 //TODO 标定样计数值需要加一
@@ -48,6 +46,7 @@
 
 #define MYSETTINGS_COM_ERR(x) QString("com_err").append(QString::number((x)))
 
+class QSettings;
 class AbstractDataSave
 {
 public:

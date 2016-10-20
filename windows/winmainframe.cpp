@@ -1,8 +1,7 @@
-#include "winmainframe.h"
-
-#include "common/buttonwinmannager.h"
+#include "windows/buttonwinmannager.h"
 #include "common/abstractfactory.h"
 
+#include "winmainframe.h"
 #include "winsystrmsettings.h"
 #include "winquerydata.h"
 

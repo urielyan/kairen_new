@@ -1,5 +1,9 @@
-#include "datasave.h"
 #include "global.h"
+
+#include "datasave.h"
+
+#include <QSettings>
+#include <QDebug>
 
 bool AbstractDataSave::contains(QString key)
 {

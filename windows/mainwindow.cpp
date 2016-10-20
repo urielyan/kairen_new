@@ -1,14 +1,16 @@
+#include "common/global.h"
+
+#include "winmainframe.h"
+#include "winabstractframe.h"
+#include "statusbar.h"
+#include "mainwindow.h"
+
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QDebug>
 
-#include "mainwindow.h"
 
-#include "common/global.h"
 
-#include "winabstractframe.h"
-#include "winmainframe.h"
-#include "statusbar.h"
 
 MainWindow *MainWindow::instance()
 {
