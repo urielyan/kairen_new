@@ -28,6 +28,11 @@ private:
     QLabel m_testedCountData;
     QLabel m_referenceCountData;
 
+    void setPlatePositionText(int platePosition);
+    void addRemainingTimeText();
+    void setTestedCountDataText(int countData);
+    void setReferenceCountDataText(int countData);
+
     void initMeasureLabel();
     void initbutton();
 };

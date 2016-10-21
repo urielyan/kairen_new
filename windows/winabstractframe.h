@@ -27,7 +27,7 @@ public:
 protected:
     AbstractComponentFactory *p_componentFactory;
 
-private slots:
+protected slots:
     void slotReturnButtonClicked();
     void slotInPlatebuttonClicked();
     void slotOutPlatebuttonClicked();

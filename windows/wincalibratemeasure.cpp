@@ -99,7 +99,16 @@ void CalibrateMeasure::slotReadComData()
 void CalibrateMeasure::initMeasureLabel()
 {
     QBoxLayout *p_layout = p_componentFactory->getBoxLayout(QBoxLayout::LeftToRight);
+    QBoxLayout *p_measureLayout = p_componentFactory->getBoxLayout(QBoxLayout::TopToBottom);
+    QBoxLayout *p_dataLayout = p_componentFactory->getBoxLayout(QBoxLayout::TopToBottom);
+    p_layout->addLayout(p_measureLayout);
+    p_layout->addLayout(p_dataLayout);
 
+    p_measureLayout->addWidget(&m_platePosition);
+    p_measureLayout->addWidget(&m_remainingTime);
+
+    p_dataLayout->addWidget(&m_testedCountData);
+    p_dataLayout->addWidget(&m_referenceCountData);
 
     addLayout(p_layout);
 }
