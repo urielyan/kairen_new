@@ -11,6 +11,7 @@
 class StatusBar : public QWidget
 {
     Q_OBJECT
+    Q_ENUMS(PlatePosition)
 public:
     enum PlatePosition{
         Tested = 0,

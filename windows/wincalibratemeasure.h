@@ -14,24 +14,27 @@ public:
     void init();
 
 private slots:
-    void slotStartButtonClicked();
-    void slotStopButtonClicked();
-    void slotQueryButtonClicked();
-    void slotReadComData();
+    void startButtonClicked();
+    void stopButtonClicked();
+    void queryButtonClicked();
+    void readComData();
 
 private:
     QTimer m_timer;
 
     QPushButton *p_startButton;
-    QLabel m_platePosition;
-    QLabel m_remainingTime;
-    QLabel m_testedCountData;
-    QLabel m_referenceCountData;
+    QLabel m_platePositionLabel;//滑板位置
+    QLabel m_remainingTimeLabel;//当前测量所剩下的时间
+    QLabel m_testedCountDataLabel;//待测样计数值
+    QLabel m_referenceCountDataLabel;//参考样计数值
 
     void setPlatePositionText(int platePosition);
     void addRemainingTimeText();
     void setTestedCountDataText(int countData);
     void setReferenceCountDataText(int countData);
+
+    bool readPlatePositon();
+    bool readCountData();
 
     void initMeasureLabel();
     void initbutton();

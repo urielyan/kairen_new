@@ -100,26 +100,33 @@ void WinAbstractFrame::slotOutPlatebuttonClicked()
 /**
 *   @brief 接收到的数据为0xfe 0x98 0x31(32,33) 0xff
 */
-void WinAbstractFrame::setPlatePosition(QByteArray recvData)
+StatusBar::PlatePosition WinAbstractFrame::setPlatePosition(QByteArray recvData)
 {
+    StatusBar::PlatePosition platePosition;
     if(recvData.isEmpty())
     {
         StatusBar::instance()->slotUpdatePosition(StatusBar::UnKnow);
         WinInforListDialog::instance()->showMsg(tr("recv null"));
-        return;
+        platePosition = StatusBar::UnKnow;
     }else if(recvData[2] == (char)0x31)
     {
         StatusBar::instance()->slotUpdatePosition(StatusBar::Referencce);
+        platePosition = StatusBar::Referencce;
     }else if(recvData[2] == (char)0x32)
     {
         StatusBar::instance()->slotUpdatePosition(StatusBar::Tested);
+        platePosition = StatusBar::Tested;
     }else if(recvData[2] == (char)0x33)
     {
         StatusBar::instance()->slotUpdatePosition(StatusBar::Malfunction);
+        platePosition = StatusBar::Malfunction;
     }else
     {
         StatusBar::instance()->slotUpdatePosition(StatusBar::UnKnow);
         WinInforListDialog::instance()->showMsg(tr("recv err") + QString(recvData).toInt());
+        platePosition = StatusBar::UnKnow;
     }
+
+    return platePosition;
 }
 

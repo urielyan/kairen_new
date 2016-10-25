@@ -35,7 +35,7 @@ private:
     QLabel *p_title;
     QVBoxLayout m_mainVBoxLayout;
 
-    void setPlatePosition(QByteArray recvData);
+    StatusBar::PlatePosition setPlatePosition(QByteArray recvData);
 };
 
 #endif // WINABSTRACTFRAME_H
