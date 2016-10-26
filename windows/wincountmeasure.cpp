@@ -105,7 +105,7 @@ void WinCountMeasure::slotReadComData()
             {
                 slotStopButtonClicked();
                 slotRepeatMeasureButtonClicked();
-                MainWindow::instance()->slotCloseTopWidget();
+                MainWindow::instance()->closeTopWidget();
             }
             return;
         }
@@ -121,7 +121,8 @@ void WinCountMeasure::setChangeLabel(uint currentTime, uint remainingTime)
     Q_ASSERT(remainingTime < 32);
 
     m_currentTimeLabel.setText(m_timeMap[currentTime]);
-    m_remainingTimelabel.setText(tr("Remaining %1 seconds").arg(remainingTime));
+    m_remainingTimelabel.setText(
+                tr("Remaining %1 seconds").arg(remainingTime));
 }
 
 

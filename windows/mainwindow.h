@@ -22,7 +22,7 @@ public:
 
 public slots:
     void slotSetWidget(QWidget *widget);
-    void slotCloseTopWidget();
+    void closeTopWidget();
 
 private:
     MainWindow(QWidget *parent = 0);

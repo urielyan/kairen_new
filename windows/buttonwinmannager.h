@@ -12,7 +12,10 @@ class ButtonWinMannager : public QObject
     Q_OBJECT
 public:
     explicit ButtonWinMannager(QObject *parent = 0);
-    void addButtonWin(QAbstractButton *button, WinAbstractFrame *win, int index = 0);
+    void addButtonWindow(QAbstractButton *button, WinAbstractFrame *win,
+                      int index = 0);
+    QAbstractButton *getButton(int index);
+    WinAbstractFrame *getWindow(int index);
 signals:
 
 private slots:

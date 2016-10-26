@@ -5,7 +5,6 @@
 
 #include "winabstractframe.h"
 #include "mainwindow.h"
-#include "statusbar.h"
 
 #include <QPushButton>
 
@@ -42,91 +41,33 @@ void WinAbstractFrame::addLayout(QLayout *layout)
 
 QPushButton *WinAbstractFrame::getReturnButton()
 {
-    QPushButton *p_returnButton = p_componentFactory->getButton(tr("Return"), this);
-    connect(p_returnButton, SIGNAL(clicked(bool)), this, SLOT(slotReturnButtonClicked()));
+    QPushButton *p_returnButton = p_componentFactory->getButton(
+                tr("Return"), this);
+    connect(p_returnButton, SIGNAL(clicked(bool)),
+            this, SLOT(slotReturnButtonClicked()));
     return p_returnButton;
 }
 
 QPushButton *WinAbstractFrame::getInPlateButton()
 {
-    QPushButton *p_inPlateButton = p_componentFactory->getButton(tr("In plate"), this);
-    connect(p_inPlateButton, SIGNAL(clicked()), this, SLOT(slotInPlatebuttonClicked()));
+    QPushButton *p_inPlateButton = p_componentFactory->getButton(
+                tr("In plate"), this);
+    connect(p_inPlateButton, &QPushButton::clicked,
+            Com::instance(), &Com::inPlateButtonClicked);
     return p_inPlateButton;
 }
 
 QPushButton *WinAbstractFrame::getOutPlateButton()
 {
-    QPushButton *p_outPlateButton = p_componentFactory->getButton(tr("Out plate"), this);
-    connect(p_outPlateButton, SIGNAL(clicked()), this, SLOT(slotOutPlatebuttonClicked()));
+    QPushButton *p_outPlateButton = p_componentFactory->getButton(
+                tr("Out plate"), this);
+    connect(p_outPlateButton, &QPushButton::clicked,
+            Com::instance(), &Com::outPlateButtonClicked);
     return p_outPlateButton;
 }
 
 void WinAbstractFrame::slotReturnButtonClicked()
 {
-    MainWindow::instance()->slotCloseTopWidget();
-}
-
-void WinAbstractFrame::slotInPlatebuttonClicked()
-{
-#ifdef TEST_COM
-    QByteArray recvData;
-    recvData[0] = (char)0xfe;
-    recvData[1] = (char)0x98;
-    recvData[2] = (char)0x32;
-    recvData[3] = (char)0xff;
-    Com::instance()->setRecvData(recvData);
-#endif
-
-
-    Com::instance()->sendOrder(Com::InPlate);
-    setPlatePosition(Com::instance()->slotReadMyCom());
-}
-
-void WinAbstractFrame::slotOutPlatebuttonClicked()
-{
-#ifdef TEST_COM
-    QByteArray recvData;
-    recvData[0] = (char)0xfe;
-    recvData[1] = (char)0x98;
-    recvData[2] = (char)0x31;
-    recvData[3] = (char)0xff;
-    Com::instance()->setRecvData(recvData);
-#endif
-
-    Com::instance()->sendOrder(Com::OutPlate);
-    setPlatePosition(Com::instance()->slotReadMyCom());
-}
-
-/**
-*   @brief 接收到的数据为0xfe 0x98 0x31(32,33) 0xff
-*/
-StatusBar::PlatePosition WinAbstractFrame::setPlatePosition(QByteArray recvData)
-{
-    StatusBar::PlatePosition platePosition;
-    if(recvData.isEmpty())
-    {
-        StatusBar::instance()->slotUpdatePosition(StatusBar::UnKnow);
-        WinInforListDialog::instance()->showMsg(tr("recv null"));
-        platePosition = StatusBar::UnKnow;
-    }else if(recvData[2] == (char)0x31)
-    {
-        StatusBar::instance()->slotUpdatePosition(StatusBar::Referencce);
-        platePosition = StatusBar::Referencce;
-    }else if(recvData[2] == (char)0x32)
-    {
-        StatusBar::instance()->slotUpdatePosition(StatusBar::Tested);
-        platePosition = StatusBar::Tested;
-    }else if(recvData[2] == (char)0x33)
-    {
-        StatusBar::instance()->slotUpdatePosition(StatusBar::Malfunction);
-        platePosition = StatusBar::Malfunction;
-    }else
-    {
-        StatusBar::instance()->slotUpdatePosition(StatusBar::UnKnow);
-        WinInforListDialog::instance()->showMsg(tr("recv err") + QString(recvData).toInt());
-        platePosition = StatusBar::UnKnow;
-    }
-
-    return platePosition;
+    MainWindow::instance()->closeTopWidget();
 }
 

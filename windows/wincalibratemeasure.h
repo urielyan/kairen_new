@@ -1,10 +1,18 @@
 #ifndef WINCALIBRATEMEASURE_H
 #define WINCALIBRATEMEASURE_H
 
+#include "statusbar.h"
 #include "winabstractframe.h"
 #include <QTimer>
 #include <QLabel>
 #include <QPushButton>
+
+class InputCalibrateData : public WinAbstractFrame
+{
+    Q_OBJECT
+public:
+    explicit InputCalibrateData(QWidget *parent = 0);
+};
 
 class CalibrateMeasure : public WinAbstractFrame
 {
@@ -16,7 +24,6 @@ public:
 private slots:
     void startButtonClicked();
     void stopButtonClicked();
-    void queryButtonClicked();
     void readComData();
 
 private:
@@ -28,13 +35,15 @@ private:
     QLabel m_testedCountDataLabel;//待测样计数值
     QLabel m_referenceCountDataLabel;//参考样计数值
 
-    void setPlatePositionText(int platePosition);
-    void addRemainingTimeText();
+private:
+    void setPlatePositionText(StatusBar::PlatePosition platePosition);
     void setTestedCountDataText(int countData);
     void setReferenceCountDataText(int countData);
 
-    bool readPlatePositon();
-    bool readCountData();
+    StatusBar::PlatePosition readPlatePositon(StatusBar::PlatePosition);
+    void readCountData();
+
+    void storeCalibrateData();
 
     void initMeasureLabel();
     void initbutton();

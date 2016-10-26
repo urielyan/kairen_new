@@ -20,7 +20,7 @@ WinMainFrame::WinMainFrame(QWidget *parent)
 
 
         QPushButton *p_syetemButton = p_componentFactory->getButton(tr("System"), this);
-        p_buttonWinMannager->addButtonWin(p_syetemButton, new WinSystrmSettings(this), SystemSettings);
+        p_buttonWinMannager->addButtonWindow(p_syetemButton, new WinSystrmSettings(this), SystemSettings);
         p_hBoxLayout->addWidget(p_syetemButton);
 
         p_hBoxLayout->addWidget(getInPlateButton());
@@ -32,7 +32,7 @@ WinMainFrame::WinMainFrame(QWidget *parent)
         QBoxLayout *p_hBoxLayout = p_componentFactory->getBoxLayout(QBoxLayout::LeftToRight);
 
         QPushButton *p_DataQueryButton = p_componentFactory->getButton(tr("Data query"), this);
-        p_buttonWinMannager->addButtonWin(p_DataQueryButton, new WinQueryData(this), DataQuery);
+        p_buttonWinMannager->addButtonWindow(p_DataQueryButton, new WinQueryData(this), DataQuery);
         p_hBoxLayout->addWidget(p_DataQueryButton);
 
         QPushButton *p_syetemButton =p_componentFactory->getButton(tr("Self test"), this);

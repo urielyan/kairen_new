@@ -38,9 +38,9 @@ WinSystrmSettings::WinSystrmSettings(QWidget *parent)
 
         addLayout(p_hBoxLayout);
 
-        p_buttonWinMannager->addButtonWin(p_spectrumMeasureButton, new WinSpectruMeasure(this), Spectrum);
-        p_buttonWinMannager->addButtonWin(p_countButton, new WinCountMeasure(this), Count);
-        p_buttonWinMannager->addButtonWin(p_calibrateButton, new WinCalibrateMeasure(this), Calibrate);
+        p_buttonWinMannager->addButtonWindow(p_spectrumMeasureButton, new WinSpectruMeasure(this), Spectrum);
+        p_buttonWinMannager->addButtonWindow(p_countButton, new WinCountMeasure(this), Count);
+        p_buttonWinMannager->addButtonWindow(p_calibrateButton, new WinCalibrateMeasure(this), Calibrate);
     }
 
     {
@@ -57,7 +57,7 @@ WinSystrmSettings::WinSystrmSettings(QWidget *parent)
 
         addLayout(p_hBoxLayout);
 
-        p_buttonWinMannager->addButtonWin(p_setDateTimeButton, new WinSetDateTime(this), SetDateTime);
+        p_buttonWinMannager->addButtonWindow(p_setDateTimeButton, new WinSetDateTime(this), SetDateTime);
     }
 }
 

@@ -29,13 +29,11 @@ protected:
 
 protected slots:
     void slotReturnButtonClicked();
-    void slotInPlatebuttonClicked();
-    void slotOutPlatebuttonClicked();
+
 private:
     QLabel *p_title;
     QVBoxLayout m_mainVBoxLayout;
 
-    StatusBar::PlatePosition setPlatePosition(QByteArray recvData);
 };
 
 #endif // WINABSTRACTFRAME_H

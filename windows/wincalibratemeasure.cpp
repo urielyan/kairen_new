@@ -7,6 +7,7 @@
 #include "buttonwinmannager.h"
 
 #include <QPushButton>
+#include <QDebug>
 
 WinCalibrateMeasure::WinCalibrateMeasure(QWidget *parent)
     : WinAbstractFrame(parent)
@@ -35,7 +36,7 @@ WinCalibrateMeasure::WinCalibrateMeasure(QWidget *parent)
 
         addLayout(p_hBoxLayout);
 
-        p_buttonWinMannager->addButtonWin(
+        p_buttonWinMannager->addButtonWindow(
                     p_calibrateMeasureButton,
                     new CalibrateMeasure(this),
                     CalibrateMeasureID
@@ -77,7 +78,10 @@ CalibrateMeasure::CalibrateMeasure(QWidget *parent)
 
 void CalibrateMeasure::init()
 {
-
+    m_platePositionLabel.clear();
+    m_remainingTimeLabel.clear();
+    m_referenceCountDataLabel.clear();
+    m_testedCountDataLabel.clear();
 }
 
 void CalibrateMeasure::startButtonClicked()
@@ -88,45 +92,106 @@ void CalibrateMeasure::startButtonClicked()
     }
     init();
 
-    Com::instance()->sendOrder(Com::CountMeasure);
-    m_timer.start(1);
+    Com::instance()->sendOrder(Com::CalibrateMeasure);
+
+    if(readPlatePositon(StatusBar::Tested) == StatusBar::Tested)
+    {
+        setPlatePositionText(StatusBar::Tested);
+        m_timer.start(50);
+    }
 }
 
 void CalibrateMeasure::stopButtonClicked()
 {
-
-}
-
-void CalibrateMeasure::queryButtonClicked()
-{
-
+    init();
+    m_timer.stop();
 }
 
 void CalibrateMeasure::readComData()
 {
-
+    uint remaingTime = 180;
+    if(m_remainingTimeLabel.text().size() != 0)
+    {
+        remaingTime = m_remainingTimeLabel.text().toInt() - 1;
+    }
+    m_remainingTimeLabel.setText(QString::number(remaingTime));
+    if(remaingTime == 0)
+    {
+        m_remainingTimeLabel.setText("180");
+        readCountData();
+    }
 }
 
-bool CalibrateMeasure::readPlatePositon()
+void CalibrateMeasure::setPlatePositionText(StatusBar::PlatePosition platePosition)
+{
+    Q_ASSERT(platePosition == StatusBar::Tested ||
+             platePosition == StatusBar::Referencce
+             );
+    if(platePosition == StatusBar::Tested)
+    {
+        m_platePositionLabel.setText(tr("Measuring tested"));
+    }else
+    {
+        m_platePositionLabel.setText(tr("Measuring reference"));
+    }
+}
+
+StatusBar::PlatePosition CalibrateMeasure::readPlatePositon(
+        StatusBar::PlatePosition platePosition)
+{
+#ifdef TEST_COM
+    QByteArray recvData;
+    recvData[0] = (char)0xfe;
+    recvData[1] = (char)0x98;
+    if(platePosition == StatusBar::Tested)
+    {
+        recvData[2] = (char)0x32;
+    }
+    else if(platePosition == StatusBar::Referencce)
+    {
+        recvData[2] = (char)0x31;
+    }
+    recvData[3] = (char)0xff;
+    Com::instance()->setRecvData(recvData);
+#endif
+
+    return StatusBar::instance()->setPlatePositionByRecvData(
+                Com::instance()->slotReadMyCom());
+}
+
+void CalibrateMeasure::readCountData()
 {
 #ifdef TEST_COM
     QByteArray data;
     data[0] = (char)0xfe;
-    data[1] = (char)0x02;
-    data[2] = (char)0x30 + (char)0x01;
-    data[3] = (char)0x30 + (char)0x02;
+    data[1] = (char)0x04;
 
-    data[4] = (char)0x31;
-    data[5] = (char)0x32;
-    data[6] = (char)0x33;
-    data[7] = (char)0x30;
-    data[8] = (char)0x30;
+    data[2] = (char)0x30;
+    data[3] = (char)0x01;
 
-    data[9] = (char)0xff;
+    if(StatusBar::instance()->getPlatePosition() == StatusBar::Tested)
+    {
+        data[4] = (char)0x30 + (char)0x01;//tested
+    }
+    else
+    {
+        data[4] = (char)0x30 + (char)0x02;//reference
+    }
+
+    data[5] = (char)0x31;
+    data[6] = (char)0x31;
+    data[7] = (char)0x31;
+    data[8] = (char)0x31;
+    data[9] = (char)0x31;
+
+    data[10] = (char)0xff;
     Com::instance()->setRecvData(data);
 #endif
     QByteArray recvData = Com::instance()->slotReadMyCom();
-    if(recvData == NULL || recvData.size() != 10|| recvData[1] != (char)0x02)
+    if(recvData == NULL
+            || recvData.size() != 11
+            || recvData[1] != (char)0x04
+            )
     {
         WinInforListDialog::instance()->showMsg(tr("err") + recvData);
         ErrorCountSave::instance()->addCount(1);
@@ -134,10 +199,30 @@ bool CalibrateMeasure::readPlatePositon()
         return;
     }
 
-    //uint which = (int)recvData[2] * 10 + (int)recvData[3] - 4;
+    if(recvData[2] == (char)0x31) //tested, first
+    {
+        m_testedCountDataLabel.setText(recvData.mid(3, 5));
+        readPlatePositon(StatusBar::Referencce);
+    }
+    else if(recvData[2] == (char)0x32) //reference second
+    {
+        m_referenceCountDataLabel.setText(recvData.mid(3, 5));
+        storeCalibrateData();
+        m_timer.stop();
+        m_remainingTimeLabel.clear();
+        m_platePositionLabel.clear();
+    }
+    else
+    {
+        qDebug() << "recv Data err  :  " << recvData;
+        stopButtonClicked();
+    }
+}
 
-    QString count = recvData.mid(4, 5);
-    m_countData.append(count.toUInt());
+void CalibrateMeasure::storeCalibrateData()
+{
+    Q_ASSERT(m_referenceCountDataLabel.text().size() != 0);
+    Q_ASSERT(m_testedCountDataLabel.text().size() != 0);
 }
 
 void CalibrateMeasure::initMeasureLabel()
@@ -183,4 +268,9 @@ void CalibrateMeasure::initbutton()
         QPushButton *p_returnButton = getReturnButton();
         p_buttonLayout->addWidget(p_returnButton);
     }
+}
+
+InputCalibrateData::InputCalibrateData(QWidget *parent)
+{
+
 }

@@ -49,7 +49,7 @@ void MainWindow::slotSetWidget(QWidget *widget)
     m_stackedLayout.setCurrentWidget(widget);
 }
 
-void MainWindow::slotCloseTopWidget()
+void MainWindow::closeTopWidget()
 {
     m_stackedLayout.removeWidget(m_stackedLayout.widget(m_stackedLayout.count() - 1));
 }

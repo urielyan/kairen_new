@@ -14,8 +14,10 @@ StatusBar *StatusBar::instance()
     return &_instance;
 }
 
-StatusBar::StatusBar(QWidget *parent) :
-    QWidget(parent)
+StatusBar::StatusBar(QWidget *parent)
+    : QWidget(parent)
+    , platePosition(UnKnow)
+    ,timerIsPreheat(NULL)
 {
     QHBoxLayout *p_mainLayout = new QHBoxLayout(this);
 
@@ -27,10 +29,48 @@ StatusBar::StatusBar(QWidget *parent) :
     p_mainLayout->addWidget(&m_labelIsPreheatSampling);
     p_mainLayout->addWidget(&m_labelDateTime);
 }
-int StatusBar::is_sampling_num = 0;
+int StatusBar::samplingNumber = 0;
 
 StatusBar::~StatusBar()
 {
+}
+
+
+/**
+*   @brief 接收到的数据为0xfe 0x98 0x31(32,33) 0xff
+*/
+StatusBar::PlatePosition StatusBar::setPlatePositionByRecvData(QByteArray recvData)
+{
+    if(recvData.isEmpty())
+    {
+        StatusBar::instance()->slotUpdatePosition(StatusBar::UnKnow);
+        //WinInforListDialog::instance()->showMsg(tr("recv null"));
+        platePosition = StatusBar::UnKnow;
+    }else if(recvData[2] == (char)0x31)
+    {
+        StatusBar::instance()->slotUpdatePosition(StatusBar::Referencce);
+        platePosition = StatusBar::Referencce;
+    }else if(recvData[2] == (char)0x32)
+    {
+        StatusBar::instance()->slotUpdatePosition(StatusBar::Tested);
+        platePosition = StatusBar::Tested;
+    }else if(recvData[2] == (char)0x33)
+    {
+        StatusBar::instance()->slotUpdatePosition(StatusBar::Malfunction);
+        platePosition = StatusBar::Malfunction;
+    }else
+    {
+        StatusBar::instance()->slotUpdatePosition(StatusBar::UnKnow);
+        //WinInforListDialog::instance()->showMsg(tr("recv err") + QString(recvData).toInt());
+        platePosition = StatusBar::UnKnow;
+    }
+
+    return platePosition;
+}
+
+StatusBar::PlatePosition StatusBar::getPlatePosition()
+{
+    return platePosition;
 }
 
 void StatusBar::slotUpdatepreheat(){
@@ -70,9 +110,9 @@ void StatusBar::initDatetime()
 }
 
 void StatusBar::slotUpdateSampling(){
-    if((is_sampling_num >= 0 && is_sampling_num <= COUNT_MEASUREMENT_DATA_COUNT) || is_sampling_num == NEED_START_SAMPLING){
+    if((samplingNumber >= 0 && samplingNumber <= COUNT_MEASUREMENT_DATA_COUNT) || samplingNumber == NEED_START_SAMPLING){
         if(1 == blink_flag){
-            switch (is_sampling_num) {
+            switch (samplingNumber) {
             case NEED_START_SAMPLING:
                 m_labelIsPreheatSampling.setText("请移动滑板到参考样采样!");
                 blink_flag  = 0;

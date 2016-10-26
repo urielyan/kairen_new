@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT       += sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -29,7 +30,8 @@ SOURCES += main.cpp\
     communication/com.cpp \
     windows/winmainframe.cpp \
     common/datasave.cpp \
-    windows/winquerydata.cpp
+    windows/winquerydata.cpp \
+    common/database.cpp
 
 HEADERS  += mainwindow.h \
     common/wininforlistdialog.h \
@@ -49,4 +51,5 @@ HEADERS  += mainwindow.h \
     communication/com.h \
     windows/winmainframe.h \
     common/datasave.h \
-    windows/winquerydata.h
+    windows/winquerydata.h \
+    common/database.h

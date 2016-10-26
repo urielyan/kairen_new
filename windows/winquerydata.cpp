@@ -45,7 +45,7 @@ WinQueryData::WinQueryData(QWidget *parent)
 
         addLayout(p_hBoxLayout);
 
-        p_buttonWinMannager->addButtonWin(p_queryCountButton, new WinQueryCountData(this), Count);
+        p_buttonWinMannager->addButtonWindow(p_queryCountButton, new WinQueryCountData(this), Count);
     }
 }
 

@@ -1,9 +1,11 @@
-#include <QTimer>
-#include <QMap>
-#include <QDebug>
+#include "windows/statusbar.h"
 
 #include "com.h"
 #include "posix_qextserialport.h"
+
+#include <QTimer>
+#include <QMap>
+#include <QDebug>
 
 Com::Com(QObject *parent) : QObject(parent)
 {
@@ -39,7 +41,7 @@ Com *Com::instance()
 #define IN_SLIDING_PLATE        0XFF3106FEUL
 #define OUT_SLIDING_PLATE       0XFF3206FEUL
 
-void Com::sendOrder(Com::Order order)
+qint64 Com::sendOrder(Com::Order order)
 {
     QMap<Com::Order, char*> orderMap;
     char arraySpectrueMeasure[3] = {(char)0xfe, (char)0x01, (char)0xff};
@@ -47,6 +49,9 @@ void Com::sendOrder(Com::Order order)
 
     char arrayCountMeasure[3] = {(char)0xfe, (char)0x02, (char)0xff};
     orderMap[CountMeasure] = (char *)arrayCountMeasure;
+
+    char arrayCalibrateMeasure[3] = {(char)0xfe, (char)0x04, (char)0xff};
+    orderMap[CalibrateMeasure] = (char *)arrayCalibrateMeasure;
 
     char arrayStop[3] = {(char)0xfe, (char)0x98, (char)0xff};
     orderMap[StopMeasure] = (char *)arrayStop;
@@ -58,7 +63,21 @@ void Com::sendOrder(Com::Order order)
     orderMap[OutPlate] = (char *)arrayOutPlate;
 
     Q_ASSERT(orderMap.contains(order));
-    qDebug() << myCom->write(orderMap[order], strlen(orderMap[order]));
+    return myCom->write(orderMap[order], strlen(orderMap[order]));
+}
+
+void Com::sendSampleMeasure(uint measurementTime, uint repeatTimes)
+{
+    char arraySampleMeasure[5] = {(char)0xfe,
+                                  (char)0x03,
+                                  (char)0x00, (char)0x00,
+                                  (char)0xff
+                                 };
+    arraySampleMeasure[3] = (char)0x30 + (char)measurementTime;
+    arraySampleMeasure[4] = (char)0x30 + (char)repeatTimes;
+
+    qDebug() << myCom->write(arraySampleMeasure,
+                             strlen(arraySampleMeasure));
 }
 
 QByteArray Com::slotReadMyCom()
@@ -92,9 +111,37 @@ QByteArray Com::slotReadMyCom()
     return readData;
 }
 
+void Com::inPlateButtonClicked()
+{
+#ifdef TEST_COM
+    QByteArray recvData;
+    recvData[0] = (char)0xfe;
+    recvData[1] = (char)0x98;
+    recvData[2] = (char)0x32;
+    recvData[3] = (char)0xff;
+    Com::instance()->setRecvData(recvData);
+#endif
 
+    Com::instance()->sendOrder(Com::InPlate);
+    StatusBar::instance()->setPlatePositionByRecvData(
+                Com::instance()->slotReadMyCom());
+}
 
+void Com::outPlateButtonClicked()
+{
+#ifdef TEST_COM
+    QByteArray recvData;
+    recvData[0] = (char)0xfe;
+    recvData[1] = (char)0x98;
+    recvData[2] = (char)0x31;
+    recvData[3] = (char)0xff;
+    Com::instance()->setRecvData(recvData);
+#endif
 
+    Com::instance()->sendOrder(Com::OutPlate);
+    StatusBar::instance()->setPlatePositionByRecvData(
+                Com::instance()->slotReadMyCom());
+}
 
 #ifdef TEST_COM
 void Com::setRecvData(QByteArray data)

@@ -9,7 +9,22 @@ ButtonWinMannager::ButtonWinMannager(QObject *parent) : QObject(parent)
     connect(p_buttonGroup, SIGNAL(buttonClicked(int)), this, SLOT(slotbuttonClicked(int)));
 }
 
-void ButtonWinMannager::addButtonWin(QAbstractButton *button, WinAbstractFrame *win, int index)
+QAbstractButton *ButtonWinMannager::getButton(int index)
+{
+    return p_buttonGroup->button(index);
+}
+
+WinAbstractFrame *ButtonWinMannager::getWindow(int index)
+{
+    if(m_winMap.contains(index))
+    {
+        return m_winMap[index];
+    }
+
+    return NULL;
+}
+
+void ButtonWinMannager::addButtonWindow(QAbstractButton *button, WinAbstractFrame *win, int index)
 {
     Q_ASSERT(button != NULL);
     Q_ASSERT(win != NULL);

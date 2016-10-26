@@ -21,9 +21,10 @@ public:
     };
     static StatusBar* instance();
     ~StatusBar();
-    static int is_sampling_num;
+    static int samplingNumber;
 
-
+    PlatePosition setPlatePositionByRecvData(QByteArray recvData);
+    PlatePosition getPlatePosition();
 public slots:
     void slotUpdatePosition(PlatePosition position);
     void slotUpdateDateTime();
@@ -34,6 +35,7 @@ private:
     explicit StatusBar(QWidget *parent = 0);
 
     bool blink_flag;
+    StatusBar::PlatePosition platePosition;
 
     QTimer *timerIsPreheat;
 
