@@ -2,6 +2,7 @@
 #include "common/datasave.h"
 #include "common/wininforlistdialog.h"
 #include "communication/com.h"
+#include "common/database.h"
 
 #include "wincalibratemeasure.h"
 #include "buttonwinmannager.h"
@@ -30,9 +31,9 @@ WinCalibrateMeasure::WinCalibrateMeasure(QWidget *parent)
                     tr("calibrate measure"), this);
         p_hBoxLayout->addWidget(p_calibrateMeasureButton);
 
-        QPushButton *p_inPlateButton = p_componentFactory->getButton(
-                    tr("Input sample content"), this);
-        p_hBoxLayout->addWidget(p_inPlateButton);
+        QPushButton *p_inputSulfurContentButton = p_componentFactory->getButton(
+                    tr("Input sulfur content"), this);
+        p_hBoxLayout->addWidget(p_inputSulfurContentButton);
 
         addLayout(p_hBoxLayout);
 
@@ -40,6 +41,11 @@ WinCalibrateMeasure::WinCalibrateMeasure(QWidget *parent)
                     p_calibrateMeasureButton,
                     new CalibrateMeasure(this),
                     CalibrateMeasureID
+                    );
+        p_buttonWinMannager->addButtonWindow(
+                    p_inputSulfurContentButton,
+                    new InputSulfurContent(this),
+                    InputSulfurContent
                     );
     }
 
@@ -270,7 +276,16 @@ void CalibrateMeasure::initbutton()
     }
 }
 
-InputCalibrateData::InputCalibrateData(QWidget *parent)
+InputSulfurContent::InputSulfurContent(QWidget *parent)
+    : WinAbstractFrame(parent)
+    , m_model(this, Database::instance()->getDb())
 {
+    setTitle(tr("Input Sulfur content"));
+    m_view.setModel(m_model);
+    m_model.setTable(Database::instance()->getTableName(
+                         Database::CalibrateData));
+    p_SqlTableModel->select();
 
+    addWidget(&m_view);
+    addWidget(getReturnButton());
 }

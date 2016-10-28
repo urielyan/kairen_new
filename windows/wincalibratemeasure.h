@@ -6,12 +6,18 @@
 #include <QTimer>
 #include <QLabel>
 #include <QPushButton>
+#include <QTableView>
+#include <QSqlTableModel>
 
-class InputCalibrateData : public WinAbstractFrame
+class InputSulfurContent : public WinAbstractFrame
 {
     Q_OBJECT
 public:
-    explicit InputCalibrateData(QWidget *parent = 0);
+    explicit InputSulfurContent(QWidget *parent = 0);
+
+private:
+    QTableView m_view;
+    QSqlTableModel m_model;
 };
 
 class CalibrateMeasure : public WinAbstractFrame
@@ -56,8 +62,8 @@ class WinCalibrateMeasure: public WinAbstractFrame
 public:
     enum WinId{
         CalibrateMeasureID = 0
-        ,InputS
-        ,CountKbValue
+        ,InputSulfurContentID
+        ,CountKbValueID
     };
     explicit WinCalibrateMeasure(QWidget *parent = 0);
 
