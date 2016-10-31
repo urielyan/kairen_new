@@ -3,14 +3,16 @@
 #include "common/wininforlistdialog.h"
 #include "communication/com.h"
 #include "common/database.h"
+#include "common/numberinput.h"
 
 #include "wincalibratemeasure.h"
 #include "buttonwinmannager.h"
 
-#include <QPushButton>
+#include <QtWidgets/QPushButton>
 #include <QDebug>
+#include <QtSql/QSqlError>
 
-WinCalibrateMeasure::WinCalibrateMeasure(QWidget *parent)
+CalibrateMeasureMainWindow::CalibrateMeasureMainWindow(QWidget *parent)
     : WinAbstractFrame(parent)
 {
     setTitle(tr("Calibrate"));
@@ -23,8 +25,8 @@ WinCalibrateMeasure::WinCalibrateMeasure(QWidget *parent)
 
         QPushButton *p_clearCalibrateDataButton = p_componentFactory->getButton(
                     tr("Clear calibrate data"), this);
-//        connect(p_clearCalibrateDataButton, &QPushButton::clicked,
-//                this, &WinCalibrateMeasure::clearCalibrateDataClicked());
+        connect(p_clearCalibrateDataButton, &QPushButton::clicked,
+                this, &CalibrateMeasureMainWindow::clearCalibrateDataClicked);
         p_hBoxLayout->addWidget(p_clearCalibrateDataButton);
 
         QPushButton *p_calibrateMeasureButton = p_componentFactory->getButton(
@@ -45,7 +47,7 @@ WinCalibrateMeasure::WinCalibrateMeasure(QWidget *parent)
         p_buttonWinMannager->addButtonWindow(
                     p_inputSulfurContentButton,
                     new InputSulfurContent(this),
-                    InputSulfurContent
+                    InputSulfurContentID
                     );
     }
 
@@ -64,9 +66,13 @@ WinCalibrateMeasure::WinCalibrateMeasure(QWidget *parent)
     }
 }
 
-void WinCalibrateMeasure::clearCalibrateDataClicked()
+void CalibrateMeasureMainWindow::clearCalibrateDataClicked()
 {
-
+    WinSureOperateDialog sureDialog(tr("Do you want to delete all calibrate data?"));
+    if(sureDialog.exec() == QDialog::Accepted)
+    {
+        Database::instance()->deleteTableData(Database::CalibrateData);
+    }
 }
 
 CalibrateMeasure::CalibrateMeasure(QWidget *parent)
@@ -79,7 +85,6 @@ CalibrateMeasure::CalibrateMeasure(QWidget *parent)
     initbutton();
 
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(readComData()));
-
 }
 
 void CalibrateMeasure::init()
@@ -103,7 +108,7 @@ void CalibrateMeasure::startButtonClicked()
     if(readPlatePositon(StatusBar::Tested) == StatusBar::Tested)
     {
         setPlatePositionText(StatusBar::Tested);
-        m_timer.start(50);
+        m_timer.start(5);
     }
 }
 
@@ -205,14 +210,16 @@ void CalibrateMeasure::readCountData()
         return;
     }
 
-    if(recvData[2] == (char)0x31) //tested, first
+    QString countData = recvData.mid(5, 5);
+
+    if(recvData[4] == (char)0x31) //tested, first
     {
-        m_testedCountDataLabel.setText(recvData.mid(3, 5));
+        m_testedCountDataLabel.setText(countData);
         readPlatePositon(StatusBar::Referencce);
     }
-    else if(recvData[2] == (char)0x32) //reference second
+    else if(recvData[4] == (char)0x32) //reference second
     {
-        m_referenceCountDataLabel.setText(recvData.mid(3, 5));
+        m_referenceCountDataLabel.setText(countData);
         storeCalibrateData();
         m_timer.stop();
         m_remainingTimeLabel.clear();
@@ -229,6 +236,11 @@ void CalibrateMeasure::storeCalibrateData()
 {
     Q_ASSERT(m_referenceCountDataLabel.text().size() != 0);
     Q_ASSERT(m_testedCountDataLabel.text().size() != 0);
+
+    Database::instance()->insertDataToCalibraeData(
+                m_referenceCountDataLabel.text().toUInt(),
+                m_testedCountDataLabel.text().toUInt()
+                );
 }
 
 void CalibrateMeasure::initMeasureLabel()
@@ -281,11 +293,59 @@ InputSulfurContent::InputSulfurContent(QWidget *parent)
     , m_model(this, Database::instance()->getDb())
 {
     setTitle(tr("Input Sulfur content"));
-    m_view.setModel(m_model);
+    m_view.setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_view.setSelectionMode(QAbstractItemView::SingleSelection);
+    m_view.setEditTriggers(QTableView::NoEditTriggers);
+    connect(&m_view, &QTableView::clicked,
+            this, &InputSulfurContent::viewClicked);
+    m_view.setModel(&m_model);
     m_model.setTable(Database::instance()->getTableName(
                          Database::CalibrateData));
-    p_SqlTableModel->select();
+    m_model.select();
+
+    QPushButton *p_updateButton = p_componentFactory->getButton(
+                tr("update"), this);
+    connect(p_updateButton, SIGNAL(clicked(bool)),
+            this, SLOT(updateButtonClicked()));
+
+    QBoxLayout *p_layout = p_componentFactory->getBoxLayout(
+                QBoxLayout::LeftToRight);
+    p_layout->addWidget(p_updateButton);
+    p_layout->addWidget(getReturnButton());
 
     addWidget(&m_view);
-    addWidget(getReturnButton());
+    addLayout(p_layout);
+}
+
+void InputSulfurContent::updateButtonClicked()
+{
+    m_model.select();
+}
+
+void InputSulfurContent::viewClicked(const QModelIndex &index)
+{
+    Q_ASSERT(index.isValid());
+
+    NumberInput input(this);
+    if(input.exec() == QDialog::Accepted)
+    {
+        QString inputString = input.getString();
+        if(inputString.size() != 6)
+        {
+            WinInforListDialog::instance()->showMsg(tr("input err"));
+            viewClicked(index);
+            return;
+        }
+
+        QModelIndex sulfurIndex = m_model.index(index.row(), 3);
+        bool ok = m_model.setData(sulfurIndex, inputString.toUInt());
+        if(false == ok)
+        {
+            WinInforListDialog::instance()->showMsg(
+                        tr("input err \n")
+                        + m_model.lastError().text());
+        }
+        m_model.submitAll();
+        m_model.select();
+    }
 }

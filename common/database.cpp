@@ -2,12 +2,12 @@
 
 #include "database.h"
 
-#include <QMessageBox>
-#include <QSqlError>
-#include <QSqlQuery>
 #include <QLatin1String>
 #include <QMapIterator>
-#include <QSqlRecord>
+#include <QtWidgets/QMessageBox>
+#include <QtSql/QSqlError>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlRecord>
 
 Database *Database::instance()
 {
@@ -27,9 +27,8 @@ Database::Database(QFrame *parent)
         return;
     }
 
-
-    tables[Sample] = QString("sample_data");
-    tables[CalibrateData] = QString("calibrate_data");
+    m_tables[Sample] = QString("sample_data");
+    m_tables[CalibrateData] = QString("calibrate_data");
 
     createTable();
 }
@@ -53,16 +52,16 @@ void Database::createTable()
                                         "deviation,"
                                         "is_auto,"
                                         "current_coefficient);").arg(
-                tables[Sample]);
+                m_tables[Sample]);
     createTableString[CalibrateData] = QString("CREATE TABLE %1("
-                                               "id,"
+                                               "id primary key,"
                                                "tested,"
                                                "reference,"
                                                "sulfur_content);").arg(
-                tables[CalibrateData]);
+                m_tables[CalibrateData]);
 
     QStringList databaseTableList = db.tables();
-    QMapIterator <int, QString> tablesIterator(tables);
+    QMapIterator <int, QString> tablesIterator(m_tables);
     while (tablesIterator.hasNext())
     {
         tablesIterator.next();
@@ -87,23 +86,46 @@ QSqlDatabase Database::getDb() const
     return db;
 }
 
-uint Database::getCalobrateDataCount()
+void Database::deleteTableData(Database::TableName key)
+{
+    Q_ASSERT(m_tables.contains(key));
+
+    if(!db.isValid())
+    {
+        return;
+    }
+    bool ok = false;
+
+    QSqlQuery query(db);
+    ok = query.exec("delete from " + m_tables[key] + " where 1;");
+    if(ok == false)
+    {
+        WinInforListDialog::instance()->showMsg(
+                    tr("deleteTableData error!"),
+                    query.lastError().text());
+    }
+}
+
+uint Database::getCalibrateDataCount()
 {
     if(!db.isValid())
     {
         return 0;
     }
     bool ok = false;
+    int count = 0;
+
     QSqlQuery query(db);
-    ok = query.exec("select * from " + tables[CalibrateData]);
+    ok = query.exec("select * from " + m_tables[CalibrateData]);
     if(ok == false)
     {
-        WinInforListDialog::instance()->showMsg(
-                    tr("getCalobrateDataCount error!"),
-                    query.lastError().text());
-        return 0;
+        count = 0;
     }
-    return query.record().count();
+    while (query.next())
+    {
+        ++count;
+    }
+    return ++count;
 }
 
 void Database::insertDataToCalibraeData(uint tested, uint reference)
@@ -113,13 +135,13 @@ void Database::insertDataToCalibraeData(uint tested, uint reference)
         return;
     }
     bool ok = false;
-    int id = getCalobrateDataCount();
+    int id = getCalibrateDataCount();
     QSqlQuery query(db);
     query.clear();//":id, :tested, :reference, :sulfur_content);").arg(
     ok = query.exec(QString("insert into %1("
                             "id, tested, reference, sulfur_content) values("
                             "%2, %3, %4, %5);").arg(
-                        tables[CalibrateData]).arg(
+                        m_tables[CalibrateData]).arg(
                         id).arg(
                         tested).arg(
                         reference).arg(
@@ -147,5 +169,7 @@ void Database::insertDataToCalibraeData(uint tested, uint reference)
 
 QString Database::getTableName(Database::TableName key)
 {
-    return tables.value(key)
+    Q_ASSERT(m_tables.contains(key));
+
+    return m_tables.value(key);
 }

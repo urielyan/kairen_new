@@ -40,7 +40,7 @@ WinSystrmSettings::WinSystrmSettings(QWidget *parent)
 
         p_buttonWinMannager->addButtonWindow(p_spectrumMeasureButton, new WinSpectruMeasure(this), Spectrum);
         p_buttonWinMannager->addButtonWindow(p_countButton, new WinCountMeasure(this), Count);
-        p_buttonWinMannager->addButtonWindow(p_calibrateButton, new WinCalibrateMeasure(this), Calibrate);
+        p_buttonWinMannager->addButtonWindow(p_calibrateButton, new CalibrateMeasureMainWindow(this), Calibrate);
     }
 
     {

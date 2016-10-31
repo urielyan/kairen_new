@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QFrame>
-#include <QSqlDatabase>
-#include <QSqlQuery>
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
 #include <QMap>
 
 class Database : public QFrame
@@ -19,12 +19,14 @@ public:
     static Database* instance();
 
     QSqlDatabase getDb() const;
-    QSqlQuery &getSqlQuery(TableName);
-
-    uint getCalobrateDataCount();
-    void insertDataToCalibraeData(uint tested, uint reference);
 
     QString getTableName(TableName key);
+    //QSqlQuery &getSqlQuery(TableName key);
+    void deleteTableData(TableName key);
+
+    uint getCalibrateDataCount();
+    void insertDataToCalibraeData(uint tested, uint reference);
+
 signals:
 
 public slots:
@@ -33,7 +35,7 @@ private:
     explicit Database(QFrame *parent = 0);
     void createTable();
     QSqlDatabase db;
-    QMap <int, QString> tables;
+    QMap <int, QString> m_tables;
 };
 
 #endif // DATABASE_H

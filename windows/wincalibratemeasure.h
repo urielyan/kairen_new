@@ -9,12 +9,17 @@
 #include <QTableView>
 #include <QSqlTableModel>
 
+class ButtonWinMannager;
+
 class InputSulfurContent : public WinAbstractFrame
 {
     Q_OBJECT
 public:
     explicit InputSulfurContent(QWidget *parent = 0);
 
+private slots:
+    void updateButtonClicked();
+    void viewClicked(const QModelIndex &index);
 private:
     QTableView m_view;
     QSqlTableModel m_model;
@@ -48,15 +53,18 @@ private:
 
     StatusBar::PlatePosition readPlatePositon(StatusBar::PlatePosition);
     void readCountData();
-
     void storeCalibrateData();
 
     void initMeasureLabel();
     void initbutton();
 };
 
-class ButtonWinMannager;
-class WinCalibrateMeasure: public WinAbstractFrame
+/**
+ * @class CalibrateMeasureMainWindow
+ * @brief 标定测量主界面，
+ *  包含标定相关的所有按钮,清除标定数据.
+ */
+class CalibrateMeasureMainWindow: public WinAbstractFrame
 {
     Q_OBJECT
 public:
@@ -65,7 +73,7 @@ public:
         ,InputSulfurContentID
         ,CountKbValueID
     };
-    explicit WinCalibrateMeasure(QWidget *parent = 0);
+    explicit CalibrateMeasureMainWindow(QWidget *parent = 0);
 
 private slots:
     void clearCalibrateDataClicked();
