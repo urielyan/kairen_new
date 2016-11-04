@@ -75,6 +75,15 @@ void CalibrateMeasureMainWindow::clearCalibrateDataClicked()
     }
 }
 
+void CalibrateMeasureMainWindow::countKbValueClicked()
+{
+    WinSureOperateDialog sureDialog(tr("计算kb值："));
+    if(sureDialog.exec() == QDialog::Accepted)
+    {
+        Database::instance()->deleteTableData(Database::CalibrateData);
+    }
+}
+
 CalibrateMeasure::CalibrateMeasure(QWidget *parent)
     :WinAbstractFrame(parent)
 {

@@ -77,6 +77,7 @@ public:
 
 private slots:
     void clearCalibrateDataClicked();
+    void countKbValueClicked();
 private:
     ButtonWinMannager *p_buttonWinMannager;
 };
