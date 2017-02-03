@@ -32,7 +32,7 @@ QString Database::getTableName(Database::TableName key)
     return m_tables.value(key);
 }
 
-void Database::deleteTableData(Database::TableName key)
+void Database::deleteTableDatas(Database::TableName key)
 {
     Q_ASSERT(m_tables.contains(key));
 
@@ -129,7 +129,7 @@ bool Database::countKbValue(uint key)
     uint calibrateDataCount = getTableDataCount(CalibrateData);
     if (
             calibrateDataCount < 3
-            || calibrate > 12
+            || calibrateDataCount > 12
             || getEffectiveCalibrateDataCount() < 3
             || getEffectiveCalibrateDataCount() > 12
             )
@@ -216,6 +216,7 @@ Database::Database(QFrame *parent)
 
     m_tables[Sample] = QString("sample_data");
     m_tables[CalibrateData] = QString("calibrate_data");
+    m_tables[CountData] = QString("count_data");
 
     createTable();
 }
@@ -235,14 +236,21 @@ void Database::createTable()
                 "work_curve, measurement_time, repeat_time, "
                 "average, deviation, "
                 "is_auto, "
-                "current_coefficient);").arg(
-                m_tables[Sample]);
+                "current_coefficient);")
+            .arg(m_tables[Sample]);
     createTableString[CalibrateData] = QString(
                 "CREATE TABLE %1("
                 "id primary key, "
                 "tested, reference, "
-                "sulfur_content);").arg(
-                m_tables[CalibrateData]);
+                "sulfur_content);")
+            .arg(m_tables[CalibrateData]);
+
+    createTableString[CountData] = QString(
+                "CREATE TABLE %1("
+                "id primary key, "
+                "dateTime, average, "
+                "lambda);")
+            .arg(m_tables[CountData]);
 
     QStringList databaseTableList = m_database.tables();
     QMapIterator <int, QString> tablesIterator(m_tables);

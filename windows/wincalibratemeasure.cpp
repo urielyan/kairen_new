@@ -71,7 +71,7 @@ void CalibrateMeasureMainWindow::clearCalibrateDataClicked()
     WinSureOperateDialog sureDialog(tr("Do you want to delete all calibrate data?"));
     if(sureDialog.exec() == QDialog::Accepted)
     {
-        Database::instance()->deleteTableData(Database::CalibrateData);
+        Database::instance()->deleteTableDatas(Database::CalibrateData);
     }
 }
 
@@ -80,7 +80,7 @@ void CalibrateMeasureMainWindow::countKbValueClicked()
     WinSureOperateDialog sureDialog(tr("计算kb值："));
     if(sureDialog.exec() == QDialog::Accepted)
     {
-        Database::instance()->deleteTableData(Database::CalibrateData);
+        Database::instance()->deleteTableDatas(Database::CalibrateData);
     }
 }
 

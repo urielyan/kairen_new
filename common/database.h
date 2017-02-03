@@ -15,7 +15,8 @@ public:
     {
         Sample = 0,
         CalibrateData,
-        CalibrateResults
+        CalibrateResults,
+        CountData
     };
     static Database* instance();
 
@@ -23,7 +24,7 @@ public:
 
     QString getTableName(TableName key);
     //QSqlQuery &getSqlQuery(TableName key);
-    void deleteTableData(TableName key);
+    void deleteTableDatas(TableName key);
     uint getTableDataCount(TableName key);
 
     void insertDataToCalibraeData(uint tested, uint reference);
