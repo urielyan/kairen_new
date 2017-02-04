@@ -30,6 +30,14 @@ public:
     void insertDataToCalibraeData(uint tested, uint reference);
 
     /**
+     * 保存计数数据到计数数据库中
+     * @param[in] average: 平均值
+     * @param[in] lambda: 工作曲线
+     * @note:
+     */
+    void insertDataToCountData(uint average, double lambda);
+
+    /**
      * 计算kb值：将kb值存入工作曲线1-9中。
      *  可以计算kb值得必要条件是：需要有3-11组有效标定数据。
      * @param[in] key: 工作曲线

@@ -24,6 +24,16 @@ WinAbstractFrame::WinAbstractFrame(QWidget *parent)
     addWidget(p_title);
 }
 
+void WinAbstractFrame::onEntry()
+{
+    //Do nothing
+}
+
+void WinAbstractFrame::onExit()
+{
+    //Do nothing
+}
+
 void WinAbstractFrame::setTitle(QString title)
 {
     p_title->setText(title);

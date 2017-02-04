@@ -3,9 +3,11 @@
 #include "common/abstractfactory.h"
 #include "windows/buttonwinmannager.h"
 #include "common/datasave.h"
+#include "common/database.h"
 
 #include "winquerydata.h"
 
+#include <QDebug>
 #include <QButtonGroup>
 #include <QMessageBox>
 #include <QHBoxLayout>
@@ -13,6 +15,9 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QTableWidget>
+#include <QDateTime>
+#include <QModelIndex>
+#include <QHeaderView>
 
 WinQueryData::WinQueryData(QWidget *parent)
     : WinAbstractFrame(parent)
@@ -20,6 +25,7 @@ WinQueryData::WinQueryData(QWidget *parent)
     setTitle(tr("Query history data"));
 
     p_buttonWinMannager = new ButtonWinMannager(this);
+
     {
         QBoxLayout *p_hBoxLayout = p_componentFactory->getBoxLayout(QBoxLayout::LeftToRight);
 
@@ -54,126 +60,117 @@ WinQueryCountData::WinQueryCountData(QWidget *parent)
     : WinAbstractFrame(parent)
 {
     setTitle(tr("Query count data"));
+
     p_componentFactory = new MeasureFrameComponent(this);
 
-    initTableWidget();
-
-    QBoxLayout *p_buttonLayout = p_componentFactory->getBoxLayout(QBoxLayout::LeftToRight);
-    addLayout(p_buttonLayout);
-    {
-        QPushButton *p_updateButton = p_componentFactory->getButton(tr("Update"), this);
-        connect(p_updateButton, SIGNAL(clicked(bool)), this, SLOT(slotUpdateButtonClicked()));
-        p_buttonLayout->addWidget(p_updateButton);
-
-        QPushButton *p_previousButton = p_componentFactory->getButton(tr("Previous"), this);
-        connect(p_previousButton, SIGNAL(clicked(bool)), this, SLOT(slotPreviousButtonClicked()));
-        p_buttonLayout->addWidget(p_previousButton);
-
-        QPushButton *p_netxButton = p_componentFactory->getButton(tr("Netx"), this);
-        connect(p_netxButton, SIGNAL(clicked(bool)), this, SLOT(slotNetxButtonClicked()));
-        p_buttonLayout->addWidget(p_netxButton);
-
-        p_buttonLayout->addWidget(getReturnButton());
-    }
-
-    slotUpdateButtonClicked();
+    initViewAndModel();
+    addWidget(getReturnButton());
 }
 
-void WinQueryCountData::slotUpdateButtonClicked()
+void WinQueryCountData::onEntry()
 {
-    uint id = CountDataSave::instance()->value(MYSETTINGS_COUNT_COUNT).toUInt();
-    Q_ASSERT(id <= MYSETTINGS_COUNT_MAX_COUNT);
-
-    setTableWidget(id);
+    m_model->select();
 }
 
-void WinQueryCountData::slotNetxButtonClicked()
-{
-    uint currentMinId = 0;
-    for (int row = p_tableWidget->rowCount() - 1; row >= 0; row--)
-    {
-         if(p_tableWidget->item(row, 0) != NULL)
-         {
-             currentMinId = p_tableWidget->item(row, 0)->text().toUInt();
-         }else
-         {
-             continue;
-         }
 
-         if(CountDataSave::instance()->value(MYSETTINGS_COUNT_DATA_DATETIME(currentMinId)).toString().size() != 0)
-         {
-             break;
-         }
-    }
-    int displayId = currentMinId - 1;
-    for(; displayId > 0; displayId--)
-    {
-        if(CountDataSave::instance()->value(MYSETTINGS_COUNT_DATA_DATETIME(displayId)).toString().size() != 0)
-        {
-            break;
-        }
-    }
-    if(displayId == 0)
-    {
-        return;
-    }
-    setTableWidget(displayId);
+void WinQueryCountData::initViewAndModel()
+{
+    m_model = new CountDataModel;
+    m_model->setTable(Database::instance()->getTableName(Database::CountData));
+//    m_model->setHeaderData(0, Qt::Horizontal, tr("Id"));
+//    m_model->setHeaderData(1, Qt::Horizontal, tr("DateTime"));
+//    m_model->setHeaderData(2, Qt::Horizontal, tr("Average"));
+//    m_model->setHeaderData(3, Qt::Horizontal, tr("Lambda"));
+
+    m_tableView.setModel(m_model);
+
+    m_tableView.horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    m_tableView.horizontalHeader()->setStretchLastSection(true); //设置充满表宽度
+
+    addWidget(&m_tableView);
 }
 
-void WinQueryCountData::slotPreviousButtonClicked()
+CountDataModel::CountDataModel(QObject *parent)
+ : QSqlTableModel(parent)
 {
-    uint currentMaxId = 0;
-    if(p_tableWidget->item(0, 0) != NULL)
-    {
-        currentMaxId = p_tableWidget->item(0, 0)->text().toUInt();
-    }
-
-    int displayId = currentMaxId + p_tableWidget->rowCount();
-    for(; displayId > 0; displayId--)
-    {
-        if(CountDataSave::instance()->value(MYSETTINGS_COUNT_DATA_DATETIME(displayId)).toString().size() != 0)
-        {
-            break;
-        }
-    }
-
-    setTableWidget(displayId);
+    setTable(Database::instance()->getTableName(Database::CountData));
+    setHeaderData(0, Qt::Horizontal, tr("Id"));
+    setHeaderData(1, Qt::Horizontal, tr("DateTime"));
+    setHeaderData(2, Qt::Horizontal, tr("Average"));
+    setHeaderData(3, Qt::Horizontal, tr("Lambda"));
 }
 
-void WinQueryCountData::initTableWidget()
+CountDataModel::~CountDataModel()
 {
-    p_tableWidget = new QTableWidget(6, 4, this);
-    p_tableWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-    p_tableWidget->setColumnWidth(1, DESKTOP_WIDTH / 3);
-
-    p_tableWidget->setHorizontalHeaderItem(0, new QTableWidgetItem(tr("ID")));
-    p_tableWidget->setHorizontalHeaderItem(1, new QTableWidgetItem(tr("Date time")));
-    p_tableWidget->setHorizontalHeaderItem(2, new QTableWidgetItem(tr("Average")));
-    p_tableWidget->setHorizontalHeaderItem(3, new QTableWidgetItem(tr("Lambda")));
-
-    addWidget(p_tableWidget);
 }
 
-void WinQueryCountData::setTableWidget(uint id)
+QVariant CountDataModel::data(const QModelIndex &index, int role) const
 {
-    p_tableWidget->clearContents();
-    for (int row = 0; row < p_tableWidget->rowCount(); row++)
+    Q_ASSERT(index.isValid());
+
+    //当为时间差列时，将时间差改为正常时间，
+    if (index.column() == 1 && role == Qt::DisplayRole)
     {
-        int displayId = id - row;
-        if(displayId <= 0)
-        {
-            displayId = MYSETTINGS_COUNT_MAX_COUNT + displayId;
-        }
-        if(CountDataSave::instance()->value(MYSETTINGS_COUNT_DATA_DATETIME(displayId)).toString().size() == 0)
-        {
-            continue;
-        }
-        p_tableWidget->setItem(row, 0, new QTableWidgetItem(QString::number(displayId)));
-        p_tableWidget->setItem(row, 1, new QTableWidgetItem(
-                                   CountDataSave::instance()->value(MYSETTINGS_COUNT_DATA_DATETIME(displayId)).toString()));
-        p_tableWidget->setItem(row, 2, new QTableWidgetItem(
-                                   CountDataSave::instance()->value(MYSETTINGS_COUNT_DATA_AVERAGE(displayId)).toString()));
-        p_tableWidget->setItem(row, 3, new QTableWidgetItem(
-                                   CountDataSave::instance()->value(MYSETTINGS_COUNT_DATA_LAMBDA(displayId)).toString()));
+        quint64 timeInterVal = QSqlTableModel::data(index, role).toLongLong();
+        return QDateTime::fromTime_t(timeInterVal).toString("yyyy/MM/dd hh:mm:ss");
     }
+
+    //设置所有文字居中显示。
+    if(role == Qt::TextAlignmentRole)
+    {
+        return Qt::AlignCenter;
+    }
+
+    return QSqlTableModel::data(index, role);
+}
+
+WinQueryDataBaseWidget::WinQueryDataBaseWidget(QWidget *parent)
+    : WinAbstractFrame(parent)
+    , m_model(NULL)
+{
+    initViewAndModel();
+
+    p_componentFactory = new MeasureFrameComponent(this);
+    addWidget(getReturnButton());
+}
+
+void WinQueryDataBaseWidget::onEntry()
+{
+    Q_ASSERT(m_model != NULL);
+
+    m_model->select();
+}
+
+QSqlTableModel *WinQueryDataBaseWidget::model() const
+{
+    return m_model;
+}
+
+void WinQueryDataBaseWidget::setModel(QSqlTableModel *model)
+{
+    m_model = model;
+    m_tableView.setModel(m_model);
+}
+
+void WinQueryDataBaseWidget::initViewAndModel()
+{
+    m_tableView.horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    m_tableView.horizontalHeader()->setStretchLastSection(true); //设置充满表宽度
+
+    addWidget(&m_tableView);
+}
+
+WinQuerySampleData::WinQuerySampleData(QWidget *parent)
+{
+
+}
+
+void WinQuerySampleData::onEntry()
+{
+
+}
+
+void WinQuerySampleData::initViewAndModel()
+{
+
 }

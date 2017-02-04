@@ -41,6 +41,7 @@ void ButtonWinMannager::slotbuttonClicked(int id)
 {
     if(m_winMap.contains(id))
     {
+        m_winMap.value(id)->onEntry();
         MainWindow::instance()->slotSetWidget(m_winMap.value(id));
     }
 }

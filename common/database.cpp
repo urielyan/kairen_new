@@ -2,6 +2,8 @@
 
 #include "database.h"
 
+#include <QDebug>
+#include <QDateTime>
 #include <QLatin1String>
 #include <QMapIterator>
 #include <QVariant>
@@ -83,38 +85,60 @@ void Database::insertDataToCalibraeData(uint tested, uint reference)
     bool ok = false;
     int id = getTableDataCount(CalibrateData);
     QSqlQuery query(m_database);
-    query.clear();//":id, :tested, :reference, :sulfur_content);").arg(
-    ok = query.exec(QString("insert into %1("
-                            "id, tested, reference, sulfur_content) values("
-                            "%2, %3, %4, %5);").arg(
-                        m_tables[CalibrateData]).arg(
-                        id).arg(
-                        tested).arg(
-                        reference).arg(
-                        "00000")
-                    );
+    query.clear();
+    ok = query.exec(
+                QString("insert into %1(id, tested, reference, sulfur_content) "
+                        "values(%2, %3, %4, %5);")
+                .arg(m_tables[CalibrateData])
+                .arg(id)
+                .arg(tested)
+                .arg(reference)
+                .arg("00000")
+                );
 
-#if 0
-    query.bindValue(0, id);
-    query.bindValue(1, tested);
-    query.bindValue(2, reference);
-    query.bindValue(3, "00000");
-
-    query.bindValue(":id", id);
-    query.bindValue(":tested", tested);
-    query.bindValue(":reference", reference);
-    query.bindValue(":sulfur_content", "00000");
-    query.exec();
-#endif
 
     if (ok == false)
     {
         WinInforListDialog::instance()->showMsg(
-                    tr("insertDataToCalibraeData error!"),
-                    query.lastError().text());
+                    tr("insertData error!"),
+                    query.lastError().text()
+                    );
         return;
     }
     return;
+}
+
+void Database::insertDataToCountData(uint average, double lambda)
+{
+    if (!m_database.isValid())
+    {
+        return;
+    }
+    bool ok = false;
+    int id = getTableDataCount(CountData);
+    QSqlQuery query(m_database);
+    query.clear();
+
+    qDebug() << QDateTime::currentDateTime().toString("yyyy/MM/dd-hh:mm:ss");
+    ok = query.exec(
+                QString("insert into %1(id, dateTime, average, lambda) "
+                        "values(%2, %3, %4, %5);"
+                        )
+                .arg(m_tables[CountData])
+                .arg(id)
+                .arg(QDateTime::currentDateTime().toTime_t()) //存储时间差。
+                .arg(average)
+                .arg(lambda)
+                );
+
+    if (ok == false)
+    {
+        WinInforListDialog::instance()->showMsg(
+                    tr("insert Data error!"),
+                    query.lastError().text()
+                    );
+        return;
+    }
 }
 
 bool Database::countKbValue(uint key)

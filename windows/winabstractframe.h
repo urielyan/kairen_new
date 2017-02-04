@@ -15,6 +15,12 @@ class WinAbstractFrame : public QFrame
 public:
     explicit WinAbstractFrame(QWidget *parent = 0);
 
+    /**
+     * 当进入离开本界面时需要完成的操作，根据每个界面实现不同。
+     */
+    virtual void onEntry();
+    virtual void onExit();
+
 public:
     void setTitle(QString title);
     void addWidget(QWidget *widget);

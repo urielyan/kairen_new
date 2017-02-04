@@ -3,8 +3,61 @@
 
 #include "winabstractframe.h"
 
+#include <QTableView>
+#include <QSqlTableModel>
+
 class ButtonWinMannager;
+class QSqlTableModel;
 class QTableWidget;
+
+class CountDataModel : public QSqlTableModel
+{
+    Q_OBJECT
+
+public:
+    explicit CountDataModel (QObject *parent = 0);
+    ~CountDataModel();
+
+    QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+};
+
+/**
+ * @class 所有数据查询界面，需要设置model和标题在进入的时候
+ */
+class WinQueryDataBaseWidget : public WinAbstractFrame
+{
+    Q_OBJECT
+
+public:
+    explicit WinQueryDataBaseWidget(QWidget *parent = 0);
+
+    void onEntry() Q_DECL_OVERRIDE;
+
+    QSqlTableModel *model() const;
+    void setModel(QSqlTableModel *model);
+
+private:
+    QTableView m_tableView;
+    QSqlTableModel *m_model;
+
+    void initViewAndModel();
+};
+
+class WinQuerySampleData: public WinAbstractFrame
+{
+    Q_OBJECT
+
+public:
+    explicit WinQuerySampleData(QWidget *parent = 0);
+
+    void onEntry() Q_DECL_OVERRIDE;
+
+private:
+    QTableView m_tableView;
+    QSqlTableModel *m_model;
+
+    void initViewAndModel();
+};
 
 class WinQueryCountData : public WinAbstractFrame
 {
@@ -13,15 +66,13 @@ class WinQueryCountData : public WinAbstractFrame
 public:
     explicit WinQueryCountData(QWidget *parent = 0);
 
-private slots:
-    void slotUpdateButtonClicked();
-    void slotNetxButtonClicked();
-    void slotPreviousButtonClicked();
+    void onEntry() Q_DECL_OVERRIDE;
 
 private:
-    QTableWidget *p_tableWidget;
-    void initTableWidget();
-    void setTableWidget(uint id);
+    QTableView m_tableView;
+    QSqlTableModel *m_model;
+
+    void initViewAndModel();
 };
 
 class WinQueryData : public WinAbstractFrame
@@ -29,7 +80,8 @@ class WinQueryData : public WinAbstractFrame
     Q_OBJECT
 
 public:
-    enum WinId{
+    enum WinId
+    {
         Sample = 0
         ,Count
         ,Calibrate
@@ -40,7 +92,6 @@ private slots:
 
 private:
     ButtonWinMannager *p_buttonWinMannager;
-
 };
 
 #endif // QUERYDATA_H

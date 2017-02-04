@@ -1,5 +1,6 @@
 #include "common/abstractfactory.h"
 #include "common/datasave.h"
+#include "common/database.h"
 #include "common/wininforlistdialog.h"
 #include "communication/com.h"
 
@@ -80,11 +81,13 @@ void WinCountMeasure::slotQueryButtonClicked()
 
 void WinCountMeasure::slotReadComData()
 {
+    //得到当前次数
     QString currentTimeString = m_currentTimeLabel.text();
     uint currentTime = m_timeMap.key(currentTimeString, 1);
 
+    //得到当前测量剩余时间
     QString remainTimeString = m_remainingTimelabel.text();
-    uint remainTime;
+    uint remainTime = 0;
     if(remainTimeString.size() == 0)
     {
         remainTime = 31;
@@ -93,14 +96,19 @@ void WinCountMeasure::slotReadComData()
         remainTime = remainTimeString.remove(tr("Remaining")).remove(tr("seconds")).toUInt();
     }
 
+    //若当前剩余时间为0，则读取串口数据
     if(remainTime == 0)
     {
         readComData();
         currentTime++;
+
+        //若当前次数等于12次则停止测量保存数据，显示测量结果。
         if(currentTime == 12)
         {
             slotQueryButtonClicked();
             init();
+
+            //若是重复测量则重新开始新的计数测量。
             if(m_flagRepeatMeasure)
             {
                 slotStopButtonClicked();
@@ -321,4 +329,6 @@ void QueryCountMeasure::saveData(int average, double lambda)
     CountDataSave::instance()->setValue(MYSETTINGS_COUNT_DATA_DATETIME(count),
                                         QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss"));
     CountDataSave::instance()->setValue(MYSETTINGS_COUNT_COUNT,count);
+
+    Database::instance()->insertDataToCountData(average, lambda);
 }
