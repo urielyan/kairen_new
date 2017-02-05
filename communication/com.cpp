@@ -9,20 +9,22 @@
 
 Com::Com(QObject *parent) : QObject(parent)
 {
-    myCom = new Posix_QextSerialPort("/dev/ttyUSB0",QextSerialBase::Polling);
+    m_com = new Posix_QextSerialPort("/dev/ttyUSB0",QextSerialBase::Polling);
 
-    myCom ->open(QIODevice::ReadWrite);
+    m_com ->open(QIODevice::ReadWrite | QIODevice::Unbuffered);
+    Q_ASSERT(m_com->isOpen());
+
     //以读写方式打开串口
-    myCom->setBaudRate(BAUD9600);//波特率设置，我们设置为9600
-    myCom->setDataBits(DATA_8);//数据位设置，我们设置为8位数据位
-    myCom->setParity(PAR_NONE);//奇偶校验设置，我们设置为无校验
-    myCom->setStopBits(STOP_1);//停止位设置，我们设置为1位停止位
-    myCom->setFlowControl(FLOW_OFF);
-    myCom->setTimeout(1000);
+    m_com->setBaudRate(BAUD9600);//波特率设置，我们设置为9600
+    m_com->setDataBits(DATA_8);//数据位设置，我们设置为8位数据位
+    m_com->setParity(PAR_NONE);//奇偶校验设置，我们设置为无校验
+    m_com->setStopBits(STOP_1);//停止位设置，我们设置为1位停止位
+    m_com->setFlowControl(FLOW_OFF);
+    m_com->setTimeout(1000);
 
-    readTimer = new QTimer(this);
+    m_readTimer = new QTimer(this);
     //readTimer->start(3000);
-    connect(readTimer,SIGNAL(timeout()),this,SLOT(slotReadMyCom()));
+    connect(m_readTimer,SIGNAL(timeout()),this,SLOT(slotReadMyCom()));
 }
 
 Com *Com::instance()
@@ -44,7 +46,8 @@ Com *Com::instance()
 qint64 Com::sendOrder(Com::Order order)
 {
     QMap<Com::Order, char*> orderMap;
-    char arraySpectrueMeasure[3] = {(char)0xfe, (char)0x01, (char)0xff};
+    //char arraySpectrueMeasure[3] = {(char)0xfe, (char)0x01, (char)0xff};
+    char arraySpectrueMeasure[3] = {(char)0xff, (char)0x01, (char)0xfe};
     orderMap[SpectrueMeasure] = (char *)arraySpectrueMeasure;
 
     char arrayCountMeasure[3] = {(char)0xfe, (char)0x02, (char)0xff};
@@ -56,6 +59,7 @@ qint64 Com::sendOrder(Com::Order order)
     char arrayStop[3] = {(char)0xfe, (char)0x98, (char)0xff};
     orderMap[StopMeasure] = (char *)arrayStop;
 
+    //char arrayInPlate[4] = {(char)0xfe, (char)0x06, (char)0x31, (char)0xff};
     char arrayInPlate[4] = {(char)0xfe, (char)0x06, (char)0x31, (char)0xff};
     orderMap[InPlate] = (char *)arrayInPlate;
 
@@ -63,7 +67,9 @@ qint64 Com::sendOrder(Com::Order order)
     orderMap[OutPlate] = (char *)arrayOutPlate;
 
     Q_ASSERT(orderMap.contains(order));
-    return myCom->write(orderMap[order], strlen(orderMap[order]));
+
+    m_com->flush();
+    return m_com->write(orderMap[order], strlen(orderMap[order]));
 }
 
 void Com::sendSampleMeasure(uint measurementTime, uint repeatTimes)
@@ -76,19 +82,21 @@ void Com::sendSampleMeasure(uint measurementTime, uint repeatTimes)
     arraySampleMeasure[3] = (char)0x30 + (char)measurementTime;
     arraySampleMeasure[4] = (char)0x30 + (char)repeatTimes;
 
-    qDebug() << myCom->write(arraySampleMeasure,
-                             strlen(arraySampleMeasure));
+    qDebug() << m_com->write(
+                    arraySampleMeasure,
+                    strlen(arraySampleMeasure)
+                    );
 }
 
 QByteArray Com::slotReadMyCom()
 {
     static int readCount =0;
 
-    QByteArray readData;
-    for(int i = 0; i < 3; i++)
+    QByteArray readData = "";
+    for(int i = 0; i < 1; i++)
     {
-        myCom->setTimeout(5000);
-        readData = myCom->readAll();    //读取串口缓冲区的所有数据给临时变量
+        m_com->setTimeout(1000);//10 seconds
+        readData = m_com->readAll();    //读取串口缓冲区的所有数据给临时变量
 
         if(readData.isEmpty())
         {
@@ -124,7 +132,8 @@ void Com::inPlateButtonClicked()
 
     Com::instance()->sendOrder(Com::InPlate);
     StatusBar::instance()->setPlatePositionByRecvData(
-                Com::instance()->slotReadMyCom());
+                Com::instance()->slotReadMyCom()
+                );
 }
 
 void Com::outPlateButtonClicked()

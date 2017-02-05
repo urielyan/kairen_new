@@ -62,8 +62,10 @@ QPushButton *WinAbstractFrame::getInPlateButton()
 {
     QPushButton *p_inPlateButton = p_componentFactory->getButton(
                 tr("In plate"), this);
-    connect(p_inPlateButton, &QPushButton::clicked,
-            Com::instance(), &Com::inPlateButtonClicked);
+    connect(
+                p_inPlateButton, &QPushButton::clicked,
+                Com::instance(), &Com::inPlateButtonClicked
+                );
     return p_inPlateButton;
 }
 

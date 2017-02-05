@@ -148,11 +148,10 @@ public slots:
 private:
     explicit Com(QObject *parent = 0);
 
-    QextSerialBase *myCom;
-    QTimer *readTimer;
+    QextSerialBase *m_com;
+    QTimer *m_readTimer ;
 
-
-#define TEST_COM  //test
+//#define TEST_COM  //test
 #ifdef TEST_COM
 public:
     QByteArray testData;

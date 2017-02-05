@@ -91,7 +91,8 @@ void WinCountMeasure::slotReadComData()
     if(remainTimeString.size() == 0)
     {
         remainTime = 31;
-    }else
+    }
+    else
     {
         remainTime = remainTimeString.remove(tr("Remaining")).remove(tr("seconds")).toUInt();
     }
